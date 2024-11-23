@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>HTAccess Generator Form</title>
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Bootstrap Icons -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+</head>
+<body>
+	<div class="container my-5">
+		<h1>HTAccess Generator Form</h1>
+		<p>github - mistral large</p>
+		<form action="javascript:void(0);" method="post">
+			<!-- Basic Options -->
+			<div class="card mb-3">
+				<div class="card-header" id="basicOptionsHeader">
+					<h2 class="mb-0">
+						<button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#basicOptionsCollapse" aria-expanded="false" aria-controls="basicOptionsCollapse"> Basic
+							Options </button>
+					</h2>
+				</div>
+				<div id="basicOptionsCollapse" class="collapse" aria-labelledby="basicOptionsHeader"
+					data-bs-parent="#accordionExample">
+					<div class="card-body">
+						<!-- Domain -->
+						<div class="mb-3">
+							<label for="domain" class="form-label">Domain</label>
+							<input type="text" class="form-control" id="domain" name="domain" placeholder="Enter your website's domain" value="example.com"
+								data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Your website's main address (e.g., 'mywebsite.com'). This is used to ensure your .htaccess rules only apply to your specific website.">
+						</div>
+						<!-- CDN Domains -->
+						<div class="mb-3">
+							<label for="cdnDomains" class="form-label">CDN Domains</label>
+							<input type="text" class="form-control" id="cdnDomains" name="cdn_domains"
+								placeholder="Enter CDN domains, separated by commas" value="cdn1.example.com, cdn2.example.com"
+								data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="List any Content Delivery Network (CDN) domains you use to serve your website's images, scripts, or other files. CDNs help your website load faster by serving content from servers closer to your visitors. Example: 'cdn.mywebsite.com, images.mywebsite.com'">
+						</div>
+						<!-- CORS Domains -->
+						<div class="mb-3">
+							<label for="corsDomains" class="form-label">CORS Allowed Domains</label>
+							<input type="text" class="form-control" id="corsDomains" name="cors_domains"
+								placeholder="Enter domains that need to access your website's resources" value="api.example.com, app.example.com"
+								data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="List other websites that need to access resources from your website (like APIs or images). This is important if you have a separate frontend and backend, or if other websites need to fetch data from your site. Example: 'api.mywebsite.com, app.mywebsite.com'">
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Feature Flags -->
+			<div class="card mb-3">
+				<div class="card-header" id="featureFlagsHeader">
+					<h2 class="mb-0">
+						<button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#featureFlagsCollapse" aria-expanded="false" aria-controls="featureFlagsCollapse"> Feature
+							Flags </button>
+					</h2>
+				</div>
+				<div id="featureFlagsCollapse" class="collapse" aria-labelledby="featureFlagsHeader"
+					data-bs-parent="#accordionExample">
+					<div class="card-body">
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="followSymlinks" name="follow_symlinks" role="switch">
+							<label class="form-check-label" for="followSymlinks" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="When enabled, your web server can follow symbolic links (shortcuts) in your website's file system. This is useful if you organize your files using shortcuts, but should be disabled if you don't specifically need it for security reasons.">
+								Follow Symlinks </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="directoryIndexing" name="directory_indexing" role="switch">
+							<label class="form-check-label" for="directoryIndexing" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="When enabled, visitors can see a list of files in your directories if there's no index file. For security, this should usually be disabled to prevent people from browsing your website's file structure.">
+								Directory Indexing </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="forceHttps" name="force_https" role="switch" checked>
+							<label class="form-check-label" for="forceHttps" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="When enabled, all visitors will be automatically redirected to the secure (HTTPS) version of your website. This ensures all data between your visitors and your website is encrypted. Recommended for any website handling user data or logins.">
+								Force HTTPS </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="prettyUrls" name="pretty_urls" role="switch">
+							<label class="form-check-label" for="prettyUrls" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Makes your URLs more readable by removing file extensions and query strings. For example, changes 'mywebsite.com/article.php?id=123' to 'mywebsite.com/article/123'. This makes URLs more user-friendly and better for SEO.">
+								Pretty URLs </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="compression" name="compression" role="switch" checked>
+							<label class="form-check-label" for="compression" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables Gzip compression, which makes your website load faster by reducing file sizes before sending them to visitors. This can significantly improve load times, especially for text-based files like HTML, CSS, and JavaScript.">
+								Compression </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="useWebp" name="use_webp" role="switch" checked>
+							<label class="form-check-label" for="useWebp" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables support for WebP images, a modern image format that provides better compression than JPEG or PNG while maintaining high quality. This can make your website load faster, but ensure your images are available in WebP format.">
+								Use WebP </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="utf8Charset" name="utf8_charset" role="switch" checked>
+							<label class="form-check-label" for="utf8Charset" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Forces your website to use UTF-8 character encoding, which ensures proper display of special characters, emojis, and text in any language. Recommended for all modern websites, especially those with international content.">
+								UTF-8 Charset </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="wildcardSubdomains" name="wildcard_subdomains" role="switch">
+							<label class="form-check-label" for="wildcardSubdomains" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Allows any subdomain of your website to work automatically (e.g., blog.mywebsite.com, shop.mywebsite.com). Enable this if you plan to use multiple subdomains, but be aware it may have security implications.">
+								Wildcard Subdomains </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="protectWpAdmin" name="protect_wp_admin" role="switch">
+							<label class="form-check-label" for="protectWpAdmin" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables WordPress-specific protection to secure the wp-admin directory. This adds an extra layer of security to prevent unauthorized access to your WordPress admin area.">
+								Protect WP Admin </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="protectPhpFiles" name="protect_php_files" role="switch">
+							<label class="form-check-label" for="protectPhpFiles" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Protects PHP files from direct access to prevent unauthorized access and execution. This is a security measure to prevent hackers from exploiting vulnerabilities in your PHP files.">
+								Protect PHP Files </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="blockPhpUploadExec" name="block_php_upload_exec" role="switch">
+							<label class="form-check-label" for="blockPhpUploadExec" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Blocks PHP file upload execution to prevent malicious code execution. This is a security measure to prevent hackers from uploading and executing malicious PHP files on your server.">
+								Block PHP Upload Execution </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="sanitizeServerTokens" name="sanitize_server_tokens" role="switch">
+							<label class="form-check-label" for="sanitizeServerTokens" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Hides server information by sanitizing server tokens to make it more difficult for attackers to gather information about your server. This is a security measure to prevent hackers from exploiting vulnerabilities in your server software.">
+								Sanitize Server Tokens </label>
+						</div>
+						<div class="mb-3">
+							<label for="wwwRedirectionSelect" class="form-label" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Choose how your website's URLs should be formatted. You can enforce URLs to always include 'www', remove 'www', or leave them unchanged. This is important for SEO and ensuring consistent access to your site.">
+								WWW/Non-WWW Redirection</label>
+							<select class="form-control" id="wwwRedirectionSelect" name="www_redirection">
+								<option value="none">Do not change</option>
+								<option value="www">Always redirect to www</option>
+								<option value="non-www">Always redirect to non-www</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="cacheHtml" class="form-label" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Set caching duration for HTML files to improve loading times.">
+								Cache HTML Files</label>
+							<select class="form-control" id="cacheHtml" name="cache_html">
+								<option value="1 month">1 Month</option>
+								<option value="6 months">6 Months</option>
+								<option value="1 year">1 Year</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="cacheImages" class="form-label" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Set caching duration for image files to improve loading times.">
+								Cache Images</label>
+							<select class="form-control" id="cacheImages" name="cache_images">
+								<option value="1 month">1 Month</option>
+								<option value="6 months">6 Months</option>
+								<option value="1 year">1 Year</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="cacheCss" class="form-label" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Set caching duration for CSS files to improve loading times.">
+								Cache CSS Files</label>
+							<select class="form-control" id="cacheCss" name="cache_css">
+								<option value="1 month">1 Month</option>
+								<option value="6 months">6 Months</option>
+								<option value="1 year">1 Year</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="cacheJs" class="form-label" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Set caching duration for JavaScript files to improve loading times.">
+								Cache JavaScript Files</label>
+							<select class="form-control" id="cacheJs" name="cache_js">
+								<option value="1 month">1 Month</option>
+								<option value="6 months">6 Months</option>
+								<option value="1 year">1 Year</option>
+							</select>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="gzipCompression" name="enable_gzip_compression" role="switch">
+							<label class="form-check-label" for="gzipCompression" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enable Gzip compression to reduce the size of files sent from the server to the browser, improving load times.">
+								Enable Gzip Compression </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="accessControl" name="access_control_enabled" role="switch">
+							<label class="form-check-label" for="accessControl" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Restrict access to certain directories or files based on IP addresses or user agents to enhance security.">
+								Access Control </label>
+						</div>
+						<div class="mb-3" id="accessControlInput" style="display: none;">
+							<label for="accessControlList" class="form-label">Access Control List (IP/User Agent)</label>
+							<textarea class="form-control" id="accessControlList" name="access_control_list" rows="4"
+								placeholder="Enter IP addresses or user agents to allow or deny, one per line"></textarea>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="customMIMETypes" name="custom_mime_types_enabled" role="switch">
+							<label class="form-check-label" for="customMIMETypes" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Specify custom MIME types for different file extensions to serve specific file types correctly.">
+								Custom MIME Types </label>
+						</div>
+						<div class="mb-3" id="customMIMETypesInput" style="display: none;">
+							<label for="mimeTypesList" class="form-label">Custom MIME Types</label>
+							<textarea class="form-control" id="mimeTypesList" name="custom_mime_types" rows="4"
+								placeholder="Enter file extensions and MIME types, e.g., '.json application/json', one per line"></textarea>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="redirectManagement" name="redirect_management_enabled" role="switch">
+							<label class="form-check-label" for="redirectManagement" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Manage redirects such as 301 and 302 to optimize SEO and site restructuring.">
+								Redirect Management </label>
+						</div>
+						<div class="mb-3" id="redirectManagementInput" style="display: none;">
+							<label for="redirectList" class="form-label">Redirect List</label>
+							<textarea class="form-control" id="redirectList" name="redirect_list" rows="4"
+								placeholder="Enter old and new URLs with redirect type, e.g., '/old-page /new-page 301', one per line"></textarea>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="hotlinkProtection" name="hotlink_protection_enabled" role="switch">
+							<label class="form-check-label" for="hotlinkProtection" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Prevent other sites from directly linking to your images or other resources to save bandwidth.">
+								Hotlink Protection </label>
+						</div>
+						<div class="mb-3" id="hotlinkProtectionInput" style="display: none;">
+							<label for="hotlinkProtectionList" class="form-label">Hotlink Protection List</label>
+							<textarea class="form-control" id="hotlinkProtectionList" name="hotlink_protection_list" rows="4"
+								placeholder="Enter domains to allow or deny, one per line"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Enhanced Security Options -->
+			<div class="card mb-3">
+				<div class="card-header" id="securityOptionsHeader">
+					<h2 class="mb-0">
+						<button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#securityOptionsCollapse" aria-expanded="false" aria-controls="securityOptionsCollapse">
+							Enhanced Security Options </button>
+					</h2>
+				</div>
+				<div id="securityOptionsCollapse" class="collapse" aria-labelledby="securityOptionsHeader"
+					data-bs-parent="#accordionExample">
+					<div class="card-body">
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="securityHeaders" name="security_headers" role="switch" checked>
+							<label class="form-check-label" for="securityHeaders" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables security headers to add an extra layer of security to your website. This includes headers like Content-Security-Policy, X-Frame-Options, and X-Content-Type-Options to prevent common web attacks.">
+								Security Headers </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="contentSecurityPolicy" name="content_security_policy" role="switch" checked>
+							<label class="form-check-label" for="contentSecurityPolicy" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables Content Security Policy (CSP) to help prevent cross-site scripting (XSS) attacks. CSP defines which sources of content are allowed to be executed within a web page, making it more difficult for attackers to inject malicious code.">
+								Content Security Policy </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="corsHeaders" name="cors_headers" role="switch" checked>
+							<label class="form-check-label" for="corsHeaders" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables Cross-Origin Resource Sharing (CORS) headers to allow/disallow cross-origin requests. This is useful if you need to allow other websites to access resources from your website, but be aware of the security implications.">
+								CORS Headers </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="blockBadBots" name="block_bad_bots" role="switch" checked>
+							<label class="form-check-label" for="blockBadBots" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Blocks known bad bots from accessing your website. This can help prevent spam, scraping, and other malicious activities.">
+								Block Bad Bots </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="protectSensitiveFiles" name="protect_sensitive_files" role="switch" checked>
+							<label class="form-check-label" for="protectSensitiveFiles" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Protects sensitive files (e.g., configuration files, logs) from being accessed directly. This is a security measure to prevent hackers from accessing sensitive information.">
+								Protect Sensitive Files </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="ipBlacklist" name="ip_blacklist_enabled" role="switch">
+							<label class="form-check-label" for="ipBlacklist" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Allows you to block specific IP addresses from accessing your website. This can be useful if you need to block malicious traffic or prevent specific users from accessing your website.">
+								IP Blacklist </label>
+						</div>
+						<div class="mb-3" id="ipBlacklistInput" style="display: none;">
+							<label for="ipBlacklistInputs" class="form-label">Enter IP addresses to block (separated by commas)</label>
+							<input type="text" class="form-control" id="ipBlacklistInputs" name="ip_blacklist" placeholder="Enter IP addresses">
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="ipWhitelist" name="ip_whitelist_enabled" role="switch">
+							<label class="form-check-label" for="ipWhitelist" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Allows you to allow only specific IP addresses to access your website. This can be useful if you need to restrict access to your website to specific users or networks.">
+								IP Whitelist </label>
+						</div>
+						<div class="mb-3" id="ipWhitelistInput" style="display: none;">
+							<label for="ipWhitelistInputs" class="form-label">Enter IP addresses to allow (separated by commas)</label>
+							<input type="text" class="form-control" id="ipWhitelistInputs" name="ip_whitelist" placeholder="Enter IP addresses">
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="countryBlacklist" name="country_blacklist_enabled" role="switch">
+							<label class="form-check-label" for="countryBlacklist" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Allows you to block specific countries from accessing your website. This can be useful if you need to restrict access to your website to specific regions or countries.">
+								Country Blacklist </label>
+						</div>
+						<div class="mb-3" id="countryBlacklistInput" style="display: none;">
+							<label for="countryBlacklistInputs" class="form-label">Enter country codes to block (separated by commas)</label>
+							<input type="text" class="form-control" id="countryBlacklistInputs" name="country_blacklist" placeholder="Enter country codes">
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="requestRateLimiting" name="request_rate_limiting" role="switch" checked>
+							<label class="form-check-label" for="requestRateLimiting" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables rate limiting to prevent abuse and brute-force attacks. This can help prevent your website from being overwhelmed by malicious traffic.">
+								Request Rate Limiting </label>
+						</div>
+						<div class="mb-3" id="requestRateLimitingInput" style="display: none;">
+							<label for="maxRequestsPerSecond" class="form-label">Maximum requests per second per IP</label>
+							<input type="number" class="form-control" id="maxRequestsPerSecond" name="max_requests_per_second" placeholder="Enter maximum requests per second">
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="fileUploadProtection" name="file_upload_protection" role="switch" checked>
+							<label class="form-check-label" for="fileUploadProtection" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Protects against malicious file uploads. This can help prevent hackers from uploading malicious files to your website.">
+								File Upload Protection </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="xssProtection" name="xss_protection" role="switch" checked>
+							<label class="form-check-label" for="xssProtection" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables Cross-Site Scripting (XSS) protection. This can help prevent hackers from injecting malicious code into your website.">
+								XSS Protection </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="clickjackingProtection" name="clickjacking_protection" role="switch" checked>
+							<label class="form-check-label" for="clickjackingProtection" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enables Clickjacking protection. This can help prevent hackers from tricking users into clicking on malicious links or buttons.">
+								Clickjacking Protection </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="mimeSniffingProtection" name="mime_sniffing_protection" role="switch" checked>
+							<label class="form-check-label" for="mimeSniffingProtection" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Protects against MIME sniffing. This can help prevent hackers from exploiting vulnerabilities in your website's file uploads.">
+								MIME Sniffing Protection </label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="securityEnhancements" name="security_enhancements" role="switch">
+							<label class="form-check-label" for="securityEnhancements" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Add additional security headers such as X-Frame-Options, X-XSS-Protection, and X-Content-Type-Options to enhance security.">
+								Security Enhancements </label>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- SSL Requirements -->
+			<div class="card mb-3">
+				<div class="card-header" id="sslRequirementsHeader">
+					<h2 class="mb-0">
+						<button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#sslRequirementsCollapse" aria-expanded="false" aria-controls="sslRequirementsCollapse">
+							SSL Requirements </button>
+					</h2>
+				</div>
+				<div id="sslRequirementsCollapse" class="collapse" aria-labelledby="sslRequirementsHeader"
+					data-bs-parent="#accordionExample">
+					<div class="card-body">
+						<div class="mb-3">
+							<label for="sslMinVersion" class="form-label">Minimum SSL/TLS Version</label>
+							<select class="form-control" id="sslMinVersion" name="ssl_min_version" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Defines the minimum version of TLS to enhance security.">
+								<option value="TLSv1.3">TLSv1.3</option>
+								<option value="TLSv1.2">TLSv1.2</option>
+							</select>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="enforceHSTS" name="enforce_hsts" role="switch" checked>
+							<label class="form-check-label" for="enforceHSTS" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enforce HTTP Strict Transport Security (HSTS) to ensure secure connections.">
+								Enforce HSTS
+							</label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="includeSubdomains" name="include_subdomains" role="switch" checked>
+							<label class="form-check-label" for="includeSubdomains" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Apply HSTS policy to all subdomains.">
+								Include Subdomains
+							</label>
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="preloadHSTS" name="preload_hsts" role="switch" checked>
+							<label class="form-check-label" for="preloadHSTS" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Add site to HSTS preload list for always secure connections.">
+								Preload HSTS
+							</label>
+						</div>
+						<div class="mb-3">
+							<label for="maxRequestsPerSecond" class="form-label">Max Requests Per Second</label>
+							<input type="number" class="form-control" id="maxRequestsPerSecond" name="max_requests_per_second" placeholder="Enter max requests per second">
+						</div>
+						<div class="mb-3">
+							<label for="hstsMaxAge" class="form-label">HSTS Max Age (seconds)</label>
+							<input type="number" class="form-control" id="hstsMaxAge" name="hsts_max_age" placeholder="Enter max age for HSTS" value="63072000">
+						</div>
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="sslForcing" name="ssl_forcing" role="switch">
+							<label class="form-check-label" for="sslForcing" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Decide if your website should always use HTTPS for secure connections. You can enforce HTTPS for the entire site or specific sections, enhancing security and protecting user data.">
+								Force SSL (HTTPS) </label>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Error Pages -->
+			<div class="card mb-3">
+				<div class="card-header" id="errorPagesHeader">
+					<h2 class="mb-0">
+						<button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#errorPagesCollapse" aria-expanded="false" aria-controls="errorPagesCollapse"> Error Pages
+						</button>
+					</h2>
+				</div>
+				<div id="errorPagesCollapse" class="collapse" aria-labelledby="errorPagesHeader"
+					data-bs-parent="#accordionExample">
+					<div class="card-body">
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="customErrorPages" name="custom_error_pages" role="switch">
+							<label class="form-check-label" for="customErrorPages" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Enable custom error pages for specific HTTP error codes. This allows you to display custom error pages instead of the default error pages.">
+								Custom Error Pages </label>
+						</div>
+						<div id="errorPagesInputs" style="display: none;">
+							<div class="mb-3">
+								<label for="error400" class="form-label">400 Bad Request Page Path</label>
+								<input type="text" class="form-control" id="error400" name="error_400" placeholder="Path to 400 error page">
+							</div>
+							<div class="mb-3">
+								<label for="error401" class="form-label">401 Unauthorized Page Path</label>
+								<input type="text" class="form-control" id="error401" name="error_401" placeholder="Path to 401 error page">
+							</div>
+							<div class="mb-3">
+								<label for="error403" class="form-label">403 Forbidden Page Path</label>
+								<input type="text" class="form-control" id="error403" name="error_403" placeholder="Path to 403 error page">
+							</div>
+							<div class="mb-3">
+								<label for="error404" class="form-label">404 Not Found Page Path</label>
+								<input type="text" class="form-control" id="error404" name="error_404" placeholder="Path to 404 error page">
+							</div>
+							<div class="mb-3">
+								<label for="error500" class="form-label">500 Server Error Page Path</label>
+								<input type="text" class="form-control" id="error500" name="error_500" placeholder="Path to 500 error page">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Custom Options -->
+			<div class="card mb-3">
+				<div class="card-header" id="customOptionsHeader">
+					<h2 class="mb-0">
+						<button class="btn btn-link collapsed" type="button" data-bs-toggle="collapse"
+							data-bs-target="#customOptionsCollapse" aria-expanded="false" aria-controls="customOptionsCollapse">
+							Custom Options </button>
+					</h2>
+				</div>
+				<div id="customOptionsCollapse" class="collapse" aria-labelledby="customOptionsHeader"
+					data-bs-parent="#accordionExample">
+					<div class="card-body">
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="useCustomDocRoot" name="use_custom_doc_root" role="switch">
+							<label class="form-check-label" for="useCustomDocRoot" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Use a custom document root path. This allows you to specify a custom directory for your website's files.">
+								Custom Document Root </label>
+						</div>
+						<div class="mb-3" id="customDocRootInput" style="display: none;">
+							<label for="customDocumentRoot" class="form-label">Document Root Path</label>
+							<input type="text" class="form-control" id="customDocumentRoot" name="custom_document_root" placeholder="Enter document root path">
+						</div>
+
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="useImagePlaceholder" name="use_image_placeholder" role="switch">
+							<label class="form-check-label" for="useImagePlaceholder" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Use a default image placeholder. This allows you to specify a default image to display when an image is not found.">
+								Image Placeholder </label>
+						</div>
+						<div class="mb-3" id="imagePlaceholderInput" style="display: none;">
+							<label for="imagePlaceholder" class="form-label">Image Placeholder Path</label>
+							<input type="text" class="form-control" id="imagePlaceholder" name="image_placeholder" placeholder="Enter image placeholder path">
+						</div>
+
+						<div class="form-check form-switch mb-3">
+							<input class="form-check-input" type="checkbox" id="useCustomRules" name="use_custom_rules" role="switch">
+							<label class="form-check-label" for="useCustomRules" data-bs-toggle="popover" data-bs-trigger="hover"
+								data-bs-content="Add custom htaccess rules. This allows you to specify custom rules for your website.">
+								Custom Rules </label>
+						</div>
+						<div class="mb-3" id="customRulesInput" style="display: none;">
+							<label for="customRules" class="form-label">Custom Rules</label>
+							<textarea class="form-control" id="customRules" name="custom_rules" rows="4"
+								placeholder="Enter custom htaccess rules, one per line"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<button type="button" id="generateButton" class="btn btn-primary">Generate .htaccess</button>
+			<div id="spinner" class="spinner-border text-primary ms-2" role="status" style="display: none;">
+				<span class="visually-hidden">Loading...</span>
+			</div>
+			<div id="resultContainer" class="mt-3" style="display: none;">
+				<textarea id="htaccessResult" class="form-control" rows="10" readonly></textarea>
+			</div>
+		</form>
+	</div>
+
+	<!-- Bootstrap JS -->
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+	<script>
+		// Initialize all popovers
+		var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+		var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+			return new bootstrap.Popover(popoverTriggerEl)
+		})
+
+		// Toggle visibility of input fields based on checkbox state
+		document.addEventListener('DOMContentLoaded', function () {
+			const toggleInputVisibility = (checkboxId, inputId) => {
+				const checkbox = document.getElementById(checkboxId);
+				const input = document.getElementById(inputId);
+				if (checkbox && input) {
+					checkbox.addEventListener('change', function () {
+						input.style.display = this.checked ? 'block' : 'none';
+					});
+				}
+			};
+
+			// List of checkbox-input pairs
+			const pairs = [
+				['ipBlacklist', 'ipBlacklistInput'],
+				['ipWhitelist', 'ipWhitelistInput'],
+				['countryBlacklist', 'countryBlacklistInput'],
+				['requestRateLimiting', 'requestRateLimitingInput'],
+				['customErrorPages', 'errorPagesInputs'],
+				['useCustomDocRoot', 'customDocRootInput'],
+				['useImagePlaceholder', 'imagePlaceholderInput'],
+				['useCustomRules', 'customRulesInput'],
+				['accessControl', 'accessControlInput'],
+				['customMIMETypes', 'customMIMETypesInput'],
+				['redirectManagement', 'redirectManagementInput'],
+				['hotlinkProtection', 'hotlinkProtectionInput']
+			];
+
+			// Set up toggle for each pair
+			pairs.forEach(pair => toggleInputVisibility(pair[0], pair[1]));
+		});
+
+		document.querySelector('form').addEventListener('submit', function(event) {
+			event.preventDefault();
+		});
+
+		document.getElementById('generateButton').addEventListener('click', function(event) {
+			event.preventDefault();
+
+			var formData = new FormData(document.querySelector('form'));
+			document.getElementById('spinner').style.display = 'inline-block';
+
+			fetch('ajax.php', {
+				method: 'POST',
+				body: formData
+			})
+			.then(response => response.json())
+			.then(data => {
+				console.log(data); // Debugging line added to check the response data
+				document.getElementById('spinner').style.display = 'none';
+				var resultContainer = document.getElementById('resultContainer');
+				var htaccessResult = document.getElementById('htaccessResult');
+				htaccessResult.value = data.htaccess;
+				resultContainer.style.display = 'block';
+			})
+			.catch(error => {
+				console.error('Error:', error);
+				document.getElementById('spinner').style.display = 'none';
+			});
+		});
+	</script>
+</body>
+</html>
