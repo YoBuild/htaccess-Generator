@@ -4,127 +4,179 @@ namespace Yohns\Generators;
 
 /**
  * Enhanced Security Htaccess Generator with comprehensive protection measures
+ * Updated to work with configuration file system
  */
-class HtaccessGenerator
-{
-	/** @var array Default configuration values */
-	private array $config = [
-		// Basic Options
-		'domain' => '',					// Main domain for the site
-		'cdn_domains' => [],			  // List of CDN domains allowed to serve assets
-		'cors_domains' => [],			 // List of domains allowed for CORS
+class HtaccessGenerator {
+	/** @var array Configuration values */
 
-		// Feature Flags
-		'follow_symlinks' => false,	   // Allow following symbolic links
-		'directory_indexing' => false,	// Allow directory listing
-		'force_https' => true,			// Force HTTPS redirects
-		'pretty_urls' => false,		   // Enable pretty URLs/URL rewriting
-		'compression' => true,			// Enable Gzip compression
-		'use_webp' => true,			  // Enable WebP image support
-		'utf8_charset' => true,		   // Force UTF-8 charset
-		'wildcard_subdomains' => false,   // Enable wildcard subdomain support
-		'enable_caching' => false,  // Enable caching headers
-		'enable_gzip_compression' => false,  // Enable Gzip compression
-		'cache_html_duration' => '1 month',  // Caching duration for HTML files
-		'cache_images_duration' => '1 year',  // Caching duration for image files
-		'cache_css_duration' => '1 month',  // Caching duration for CSS files
-		'cache_js_duration' => '1 month',  // Caching duration for JavaScript files
-
-		// Enhanced Security Options
-		'security_headers' => true,	   // Enable security headers
-		'content_security_policy' => true, // Enable CSP
-		'cors_headers' => true,		   // Enable CORS headers
-		'block_bad_bots' => true,		 // Block known bad bots
-		'protect_sensitive_files' => true, // Protect sensitive files
-		'ip_blacklist' => [],			// List of IPs to block
-		'ip_whitelist' => [],			// List of IPs to allow
-		'country_blacklist' => [],		// List of country codes to block
-		'request_rate_limiting' => true,   // Enable rate limiting
-		'max_requests_per_second' => 10,   // Maximum requests per second per IP
-		'file_upload_protection' => true,  // Protect against malicious file uploads
-		'xss_protection' => true,		 // Enable XSS protection
-		'clickjacking_protection' => true, // Enable clickjacking protection
-		'mime_sniffing_protection' => true, // Protect against MIME sniffing
-		'ssl_requirements' => [		   // SSL/TLS requirements
-			'min_version' => 'TLSv1.2',
-			'enforce_hsts' => true,
-			'hsts_max_age' => 31536000,
-			'include_subdomains' => true,
-			'preload' => true
-		],
-		// SSL Forcing
-		'ssl_forcing' => 'none',           // SSL forcing option
-
-		'protect_wp_admin' => false,	  // WordPress-specific protection
-		'protect_php_files' => true,	  // Protect PHP files from direct access
-		'block_php_upload_exec' => true,  // Block PHP file uploads execution
-		'sanitize_server_tokens' => true, // Hide server information
-		'additional_security_headers' => false,  // Enable additional security headers
-
-		// Error Pages
-		'error_pages' => [
-			'400' => null,
-			'401' => null,
-			'403' => null,
-			'404' => null,
-			'500' => null
-		],
-
-		// Custom Options
-		'custom_document_root' => null,   // Custom document root path
-		'image_placeholder' => null,	  // Path to default image placeholder
-		'custom_rules' => [],			// Array of custom htaccess rules
-
-		// WWW/Non-WWW Redirection
-		'www_redirection' => 'none',       // WWW/Non-WWW redirection option
-
-		// Access Control
-		'access_control_enabled' => false,  // Enable access control
-		'access_control_list' => [],  // List of IPs/User Agents for access control
-
-		// Custom MIME Types
-		'custom_mime_types' => [],  // Custom MIME types
-
-		// Redirect Management
-		'redirect_management_enabled' => false,  // Enable redirect management
-		'redirect_list' => [],  // List of redirects
-
-		// Hotlink Protection
-		'hotlink_protection_enabled' => false,  // Enable hotlink protection
-	];
+	private array $config = [];
 
 	/**
 	 * Constructor to initialize configuration
 	 */
-	public function __construct(array $config = [])
-	{
-		$this->config = array_merge($this->config, $config);
+	public function __construct(array $config = []) {
+		$this->config = $this->mergeWithDefaults($config);
+	}
+
+	/**
+	 * Merge user config with default values
+	 */
+	private function mergeWithDefaults(array $userConfig): array {
+		$defaults = [
+			// Basic Options
+			'domain'                      => '',
+			'cdn_domains'                 => [],
+			'cors_domains'                => [],
+
+			// Feature Flags
+			'follow_symlinks'             => false,
+			'directory_indexing'          => false,
+			'force_https'                 => true,
+			'pretty_urls'                 => false,
+			'compression'                 => true,
+			'use_webp'                    => true,
+			'utf8_charset'                => true,
+			'wildcard_subdomains'         => false,
+			'enable_caching'              => false,
+			'enable_gzip_compression'     => false,
+			'cache_html_duration'         => '1 month',
+			'cache_images_duration'       => '1 year',
+			'cache_css_duration'          => '1 month',
+			'cache_js_duration'           => '1 month',
+
+			// Security Options
+			'security_headers'            => true,
+			'content_security_policy'     => true,
+			'cors_headers'                => true,
+			'block_bad_bots'              => true,
+			'protect_sensitive_files'     => true,
+			'ip_blacklist'                => [],
+			'ip_whitelist'                => [],
+			'country_blacklist'           => [],
+			'request_rate_limiting'       => true,
+			'max_requests_per_second'     => 10,
+			'file_upload_protection'      => true,
+			'xss_protection'              => true,
+			'clickjacking_protection'     => true,
+			'mime_sniffing_protection'    => true,
+			'protect_wp_admin'            => false,
+			'protect_php_files'           => true,
+			'block_php_upload_exec'       => true,
+			'sanitize_server_tokens'      => true,
+			'additional_security_headers' => false,
+
+			// SSL Requirements
+			'ssl_requirements'            => [
+					'min_version'        => 'TLSv1.2',
+					'enforce_hsts'       => true,
+					'hsts_max_age'       => 31536000,
+					'include_subdomains' => true,
+					'preload'            => true
+				],
+			'ssl_forcing'                 => 'none',
+
+			// WWW/Non-WWW Redirection
+			'www_redirection'             => 'none',
+
+			// Error Pages
+			'error_pages'                 => [
+					'400' => null,
+					'401' => null,
+					'403' => null,
+					'404' => null,
+					'500' => null
+				],
+
+			// Access Control
+			'access_control_enabled'      => false,
+			'access_control_list'         => [],
+
+			// Custom MIME Types
+			'custom_mime_types_enabled'   => false,
+			'custom_mime_types'           => [],
+
+			// Redirect Management
+			'redirect_management_enabled' => false,
+			'redirect_list'               => [],
+
+			// Hotlink Protection
+			'hotlink_protection_enabled'  => false,
+			'hotlink_protection_list'     => [],
+
+			// Custom Options
+			'custom_document_root'        => null,
+			'image_placeholder'           => null,
+			'custom_rules'                => []
+		];
+
+		return array_merge($defaults, $userConfig);
 	}
 
 	/**
 	 * Set a configuration option
 	 */
-	public function setOption(string $key, mixed $value): void
-	{
-		if (array_key_exists($key, $this->config)) {
-			$this->config[$key] = $value;
-		}
+	public function setOption(string $key, mixed $value): void {
+		$this->config[$key] = $value;
 	}
 
 	/**
 	 * Generate the htaccess content
 	 */
-	public function generate(): string
-	{
+	public function generate(): string {
 		$lines = [];
+
+		// Add generation timestamp
+		$lines[] = '# Generated by Enhanced .htaccess Generator';
+		$lines[] = '# Generated on: ' . date('Y-m-d H:i:s T');
+		$lines[] = '# Domain: ' . ($this->config['domain'] ?: 'Not specified');
+		$lines[] = '';
 
 		// Server Tokens
 		if ($this->config['sanitize_server_tokens']) {
+			$lines[] = '# Hide server information';
 			$lines[] = 'ServerSignature Off';
 			$lines[] = 'ServerTokens Prod';
+			$lines[] = '';
 		}
 
 		// Basic Options
+		$this->addBasicOptions($lines);
+
+		// Security Configuration
+		$this->addSecurityConfiguration($lines);
+
+		// Access Control
+		$this->addAccessControl($lines);
+
+		// HTTPS and SSL Configuration
+		$this->addSSLConfiguration($lines);
+
+		// Performance Optimizations
+		$this->addPerformanceOptimizations($lines);
+
+		// URL Management
+		$this->addURLManagement($lines);
+
+		// File Protection
+		$this->addFileProtection($lines);
+
+		// Error Pages
+		$this->addErrorPages($lines);
+
+		// Custom Configurations
+		$this->addCustomConfigurations($lines);
+
+		return implode("\n", $lines);
+	}
+
+	/**
+	 * Add basic Apache options
+	 */
+	private function addBasicOptions(array &$lines): void {
+		$lines[] = '# ================================';
+		$lines[] = '# BASIC APACHE OPTIONS';
+		$lines[] = '# ================================';
+
 		if ($this->config['follow_symlinks']) {
 			$lines[] = 'Options +FollowSymLinks';
 		}
@@ -135,265 +187,665 @@ class HtaccessGenerator
 
 		// UTF-8 Charset
 		if ($this->config['utf8_charset']) {
+			$lines[] = '';
+			$lines[] = '# Force UTF-8 encoding';
 			$lines[] = 'AddDefaultCharset utf-8';
 			$lines[] = 'AddCharset utf-8 .atom .css .js .json .rss .vtt .xml';
 		}
 
 		// Rewrite Engine
+		$lines[] = '';
+		$lines[] = '# Enable URL rewriting';
 		$lines[] = 'RewriteEngine On';
 		$lines[] = 'RewriteBase /';
+		$lines[] = '';
+	}
 
-		// IP Blocking
-		if (!empty($this->config['ip_blacklist'])) {
-			$lines[] = 'Order Allow,Deny';
-			$lines[] = 'Allow from all';
-			foreach ($this->config['ip_blacklist'] as $ip) {
-				$nip = $ip ?? '';
-				$lines[] = "Deny from $nip";
+	/**
+	 * Add comprehensive security configuration
+	 */
+	private function addSecurityConfiguration(array &$lines): void {
+		$lines[] = '# ================================';
+		$lines[] = '# SECURITY CONFIGURATION';
+		$lines[] = '# ================================';
+
+		// Security Headers
+		if ($this->config['security_headers'] || $this->config['additional_security_headers']) {
+			$lines[] = '';
+			$lines[] = '<IfModule mod_headers.c>';
+			$lines[] = "\t# Basic security headers";
+			$lines[] = "\tHeader always set X-Content-Type-Options \"nosniff\"";
+
+			if ($this->config['clickjacking_protection']) {
+				$lines[] = "\tHeader always set X-Frame-Options \"SAMEORIGIN\"";
 			}
+
+			if ($this->config['xss_protection']) {
+				$lines[] = "\tHeader always set X-XSS-Protection \"1; mode=block\"";
+			}
+
+			if ($this->config['additional_security_headers']) {
+				$lines[] = "\t# Additional security headers";
+				$lines[] = "\tHeader always set Referrer-Policy \"strict-origin-when-cross-origin\"";
+				$lines[] = "\tHeader always set Permissions-Policy \"geolocation=(), midi=(), sync-xhr=(), microphone=(), camera=(), magnetometer=(), gyroscope=(), fullscreen=(self), payment=()\"";
+				$lines[] = "\tHeader always set Cross-Origin-Embedder-Policy \"require-corp\"";
+				$lines[] = "\tHeader always set Cross-Origin-Opener-Policy \"same-origin\"";
+				$lines[] = "\tHeader always set Cross-Origin-Resource-Policy \"same-origin\"";
+			}
+
+			$lines[] = '</IfModule>';
 		}
 
-		// IP Whitelisting (Override)
-		if (!empty($this->config['ip_whitelist'])) {
-			$lines[] = 'Order Deny,Allow';
-			$lines[] = 'Deny from all';
-			foreach ($this->config['ip_whitelist'] as $ip) {
-				$nip = $ip ?? '';
-				$lines[] = "Allow from $nip";
-			}
+		// Content Security Policy
+		if ($this->config['content_security_policy']) {
+			$this->addContentSecurityPolicy($lines);
 		}
 
-		// Country Blocking
-		if (!empty($this->config['country_blacklist'])) {
-			$lines[] = 'SetEnvIf GEOIP_COUNTRY_CODE ^('.implode('|', $this->config['country_blacklist']).')$ BlockCountry';
-			$lines[] = 'Deny from env=BlockCountry';
-		}
-
-		// HTTPS Redirect with HSTS
-		if ($this->config['force_https']) {
-			$lines[] = 'RewriteCond %{HTTPS} off';
-			$lines[] = 'RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]';
-
-			if ($this->config['ssl_requirements']['enforce_hsts']) {
-				$hsts = "max-age={$this->config['ssl_requirements']['hsts_max_age']}";
-				if ($this->config['ssl_requirements']['include_subdomains']) {
-					$hsts .= '; includeSubDomains';
-				}
-				if ($this->config['ssl_requirements']['preload']) {
-					$hsts .= '; preload';
-				}
-				$lines[] = "Header always set Strict-Transport-Security \"$hsts\"";
-			}
+		// CORS Headers
+		if ($this->config['cors_headers'] && !empty($this->config['cors_domains'])) {
+			$this->addCORSHeaders($lines);
 		}
 
 		// Rate Limiting
 		if ($this->config['request_rate_limiting']) {
+			$lines[] = '';
+			$lines[] = '# Rate limiting protection';
 			$lines[] = '<IfModule mod_ratelimit.c>';
-			$lines[] = "RateLimitPerSecond {$this->config['max_requests_per_second']}";
+			$lines[] = "\tSetOutputFilter RATE_LIMIT";
+			$lines[] = "\tSetEnv rate-limit {$this->config['max_requests_per_second']}";
 			$lines[] = '</IfModule>';
-		}
-
-		// Protect Sensitive Files
-		if ($this->config['protect_sensitive_files']) {
-			$lines[] = '<FilesMatch "^(\.htaccess|\.htpasswd|\.git|\.env|wp-config\.php|config\.php|configuration\.php|\.log|\.ini|\.json)$">';
-			$lines[] = 'Order allow,deny';
-			$lines[] = 'Deny from all';
-			$lines[] = '</FilesMatch>';
 		}
 
 		// Block Bad Bots
 		if ($this->config['block_bad_bots']) {
+			$lines[] = '';
+			$lines[] = '# Block bad bots and crawlers';
 			$lines[] = 'RewriteCond %{HTTP_USER_AGENT} ^.*(robot|spider|crawler|wget|curl|uniform|loader|grab|slurp|Bot|bot|python|harvest|scan|winhttp|clshttp|loader|email|extract|fetch).*$ [NC]';
 			$lines[] = 'RewriteRule ^ - [F,L]';
 		}
 
-		// Protect Against PHP File Upload Execution
-		if ($this->config['block_php_upload_exec']) {
-			$lines[] = '<FilesMatch "\.(?i:php|php3|php4|php5|phtml|phptml)$">';
-			$lines[] = 'RewriteCond %{REQUEST_URI} !^/index\.php$';
-			$lines[] = 'RewriteCond %{DOCUMENT_ROOT}/uploads/ -preg "^(.*)$"';
-			$lines[] = 'RewriteRule .* - [F,L]';
+		$lines[] = '';
+	}
+
+	/**
+	 * Add Content Security Policy
+	 */
+	private function addContentSecurityPolicy(array &$lines): void {
+		$lines[] = '';
+		$lines[] = '# Content Security Policy';
+		$lines[] = '<IfModule mod_headers.c>';
+
+		$csp = [
+			"default-src 'self'",
+			"script-src 'self' 'strict-dynamic' 'unsafe-inline' 'unsafe-eval'",
+			"style-src 'self' 'unsafe-inline'",
+			"img-src 'self' data: https:",
+			"font-src 'self'",
+			"connect-src 'self'",
+			"media-src 'self'",
+			"object-src 'none'",
+			"frame-src 'self'",
+			"worker-src 'self'",
+			"frame-ancestors 'self'",
+			"form-action 'self'",
+			"base-uri 'self'",
+			"manifest-src 'self'",
+			"upgrade-insecure-requests",
+			"block-all-mixed-content"
+		];
+
+		// Add CDN domains to CSP
+		if (!empty($this->config['cdn_domains'])) {
+			$cdnList = implode(' ', $this->config['cdn_domains']);
+			$csp[1] .= " $cdnList";
+			$csp[2] .= " $cdnList";
+			$csp[3] .= " $cdnList";
+		}
+
+		$lines[] = "\tHeader always set Content-Security-Policy \"" . implode('; ', $csp) . "\"";
+		$lines[] = '</IfModule>';
+	}
+
+	/**
+	 * Add CORS headers
+	 */
+	private function addCORSHeaders(array &$lines): void {
+		$lines[] = '';
+		$lines[] = '# CORS Configuration';
+		$lines[] = '<IfModule mod_headers.c>';
+
+		$allowedOrigins = implode('|', array_map('preg_quote', $this->config['cors_domains']));
+		$lines[] = "\tSetEnvIf Origin \"^https?://($allowedOrigins)$\" CORS_ORIGIN=\$0";
+		$lines[] = "\tHeader always set Access-Control-Allow-Origin %{CORS_ORIGIN}e env=CORS_ORIGIN";
+		$lines[] = "\tHeader always set Access-Control-Allow-Methods \"GET, POST, PUT, DELETE, OPTIONS\"";
+		$lines[] = "\tHeader always set Access-Control-Allow-Headers \"Content-Type, Authorization, X-Requested-With\"";
+		$lines[] = "\tHeader always set Access-Control-Allow-Credentials \"true\"";
+		$lines[] = "\tHeader always set Access-Control-Max-Age \"3600\"";
+		$lines[] = "\tHeader always set Vary \"Origin\"";
+
+		$lines[] = '</IfModule>';
+	}
+
+	/**
+	 * Add access control (IP blocking/allowing)
+	 */
+	private function addAccessControl(array &$lines): void {
+		// IP Blacklist
+		if (!empty($this->config['ip_blacklist'])) {
+			$lines[] = '# IP Blacklist';
+			$lines[] = 'Order Allow,Deny';
+			$lines[] = 'Allow from all';
+			foreach ($this->config['ip_blacklist'] as $ip) {
+				$lines[] = "Deny from $ip";
+			}
+			$lines[] = '';
+		}
+
+		// IP Whitelist (overrides blacklist)
+		if (!empty($this->config['ip_whitelist'])) {
+			$lines[] = '# IP Whitelist (restrictive - only these IPs allowed)';
+			$lines[] = 'Order Deny,Allow';
+			$lines[] = 'Deny from all';
+			foreach ($this->config['ip_whitelist'] as $ip) {
+				$lines[] = "Allow from $ip";
+			}
+			$lines[] = '';
+		}
+
+		// Country Blocking
+		if (!empty($this->config['country_blacklist'])) {
+			$lines[] = '# Country Blocking (requires GeoIP module)';
+			$countries = implode('|', $this->config['country_blacklist']);
+			$lines[] = "SetEnvIf GEOIP_COUNTRY_CODE ^($countries)$ BlockCountry";
+			$lines[] = 'Order Allow,Deny';
+			$lines[] = 'Allow from all';
+			$lines[] = 'Deny from env=BlockCountry';
+			$lines[] = '';
+		}
+
+		// Access Control List
+		if ($this->config['access_control_enabled'] && !empty($this->config['access_control_list'])) {
+			$lines[] = '# Custom Access Control';
+			foreach ($this->config['access_control_list'] as $entry) {
+				if (filter_var($entry, FILTER_VALIDATE_IP)) {
+					$lines[] = "Require not ip $entry";
+				} else {
+					$lines[] = "BrowserMatchNoCase \"$entry\" BlockUserAgent";
+					$lines[] = 'Order Allow,Deny';
+					$lines[] = 'Allow from all';
+					$lines[] = 'Deny from env=BlockUserAgent';
+				}
+			}
+			$lines[] = '';
+		}
+	}
+
+	/**
+	 * Add SSL/HTTPS configuration
+	 */
+	private function addSSLConfiguration(array &$lines): void {
+		$lines[] = '# ================================';
+		$lines[] = '# SSL/HTTPS CONFIGURATION';
+		$lines[] = '# ================================';
+
+		// Force HTTPS
+		if ($this->config['force_https'] || $this->config['ssl_forcing'] === 'entire-site') {
+			$lines[] = '';
+			$lines[] = '# Force HTTPS redirect';
+			$lines[] = 'RewriteCond %{HTTPS} off';
+			$lines[] = 'RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]';
+		}
+
+		// HSTS (HTTP Strict Transport Security)
+		if ($this->config['ssl_requirements']['enforce_hsts']) {
+			$lines[] = '';
+			$lines[] = '# HTTP Strict Transport Security (HSTS)';
+			$lines[] = '<IfModule mod_headers.c>';
+
+			$hsts = "max-age={$this->config['ssl_requirements']['hsts_max_age']}";
+			if ($this->config['ssl_requirements']['include_subdomains']) {
+				$hsts .= '; includeSubDomains';
+			}
+			if ($this->config['ssl_requirements']['preload']) {
+				$hsts .= '; preload';
+			}
+
+			$lines[] = "\tHeader always set Strict-Transport-Security \"$hsts\"";
+			$lines[] = '</IfModule>';
+		}
+
+		$lines[] = '';
+	}
+
+	/**
+	 * Add performance optimizations
+	 */
+	private function addPerformanceOptimizations(array &$lines): void {
+		$lines[] = '# ================================';
+		$lines[] = '# PERFORMANCE OPTIMIZATIONS';
+		$lines[] = '# ================================';
+
+		// Gzip Compression
+		if ($this->config['compression'] || $this->config['enable_gzip_compression']) {
+			$lines[] = '';
+			$lines[] = '# Gzip Compression';
+			$lines[] = '<IfModule mod_deflate.c>';
+			$lines[] = "\tSetOutputFilter DEFLATE";
+			$lines[] = "\tAddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript";
+			$lines[] = "\tAddOutputFilterByType DEFLATE application/javascript application/x-javascript";
+			$lines[] = "\tAddOutputFilterByType DEFLATE application/xml application/xml+rss application/xhtml+xml";
+			$lines[] = "\tAddOutputFilterByType DEFLATE application/rss+xml application/json";
+			$lines[] = "\t# Don't compress images and other binary files";
+			$lines[] = "\tSetEnvIfNoCase Request_URI \\.(?:gif|jpe?g|png|pdf|zip|rar|exe)$ no-gzip dont-vary";
+			$lines[] = '</IfModule>';
+		}
+
+		// Browser Caching
+		if ($this->config['enable_caching']) {
+			$this->addCacheHeaders($lines);
+		}
+
+		// WebP Support
+		if ($this->config['use_webp']) {
+			$lines[] = '';
+			$lines[] = '# WebP Image Support';
+			$lines[] = '<IfModule mod_rewrite.c>';
+			$lines[] = "\tRewriteCond %{HTTP_ACCEPT} image/webp";
+			$lines[] = "\tRewriteCond %{REQUEST_FILENAME} \\.(jpe?g|png)$";
+			$lines[] = "\tRewriteCond %{REQUEST_FILENAME}.webp -f";
+			$lines[] = "\tRewriteRule (.+)\\.(jpe?g|png)$ \$1.\$2.webp [T=image/webp,E=accept:1]";
+			$lines[] = '</IfModule>';
+		}
+
+		$lines[] = '';
+	}
+
+	/**
+	 * Add cache headers for different file types
+	 */
+	private function addCacheHeaders(array &$lines): void {
+		$lines[] = '';
+		$lines[] = '# Browser Caching';
+		$lines[] = '<IfModule mod_expires.c>';
+		$lines[] = "\tExpiresActive On";
+
+		// Convert duration strings to Apache format
+		$durations = [
+			'1 day'    => '1 day',
+			'1 week'   => '1 week',
+			'1 month'  => '1 month',
+			'6 months' => '6 months',
+			'1 year'   => '1 year'
+		];
+
+		// HTML files
+		$htmlDuration = $durations[$this->config['cache_html_duration']] ?? '1 month';
+		$lines[] = "\tExpiresByType text/html \"access plus $htmlDuration\"";
+
+		// CSS files
+		$cssDuration = $durations[$this->config['cache_css_duration']] ?? '1 month';
+		$lines[] = "\tExpiresByType text/css \"access plus $cssDuration\"";
+
+		// JavaScript files
+		$jsDuration = $durations[$this->config['cache_js_duration']] ?? '1 month';
+		$lines[] = "\tExpiresByType application/javascript \"access plus $jsDuration\"";
+		$lines[] = "\tExpiresByType text/javascript \"access plus $jsDuration\"";
+
+		// Images
+		$imageDuration = $durations[$this->config['cache_images_duration']] ?? '1 year';
+		$lines[] = "\tExpiresByType image/jpg \"access plus $imageDuration\"";
+		$lines[] = "\tExpiresByType image/jpeg \"access plus $imageDuration\"";
+		$lines[] = "\tExpiresByType image/gif \"access plus $imageDuration\"";
+		$lines[] = "\tExpiresByType image/png \"access plus $imageDuration\"";
+		$lines[] = "\tExpiresByType image/webp \"access plus $imageDuration\"";
+		$lines[] = "\tExpiresByType image/svg+xml \"access plus $imageDuration\"";
+
+		// Other assets
+		$lines[] = "\tExpiresByType application/pdf \"access plus 1 month\"";
+		$lines[] = "\tExpiresByType application/x-shockwave-flash \"access plus 1 month\"";
+
+		$lines[] = '</IfModule>';
+	}
+
+	/**
+	 * Add URL management (redirects, pretty URLs, etc.)
+	 */
+	private function addURLManagement(array &$lines): void {
+		$lines[] = '# ================================';
+		$lines[] = '# URL MANAGEMENT';
+		$lines[] = '# ================================';
+
+		// WWW/Non-WWW Redirection
+		if ($this->config['www_redirection'] !== 'none') {
+			$lines[] = '';
+			if ($this->config['www_redirection'] === 'www') {
+				$lines[] = '# Force WWW';
+				$lines[] = 'RewriteCond %{HTTP_HOST} !^www\\. [NC]';
+				$lines[] = 'RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]';
+			} else {
+				$lines[] = '# Force Non-WWW';
+				$lines[] = 'RewriteCond %{HTTP_HOST} ^www\\. [NC]';
+				$lines[] = 'RewriteRule ^(.*)$ https://%{HTTP_HOST:2}/$1 [R=301,L]';
+			}
+		}
+
+		// Custom Redirects
+		if ($this->config['redirect_management_enabled'] && !empty($this->config['redirect_list'])) {
+			$lines[] = '';
+			$lines[] = '# Custom Redirects';
+			foreach ($this->config['redirect_list'] as $redirect) {
+				$parts = explode(' ', trim($redirect), 3);
+				if (count($parts) === 3) {
+					[$oldUrl, $newUrl, $code] = $parts;
+					$lines[] = "Redirect $code $oldUrl $newUrl";
+				}
+			}
+		}
+
+		// Pretty URLs
+		if ($this->config['pretty_urls']) {
+			$lines[] = '';
+			$lines[] = '# Pretty URLs (remove file extensions)';
+			$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-f';
+			$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-d';
+			$lines[] = 'RewriteRule ^([^.]+)$ $1.php [NC,L]';
+		}
+
+		$lines[] = '';
+	}
+
+	/**
+	 * Add file protection rules
+	 */
+	private function addFileProtection(array &$lines): void {
+		$lines[] = '# ================================';
+		$lines[] = '# FILE PROTECTION';
+		$lines[] = '# ================================';
+
+		// Protect Sensitive Files
+		if ($this->config['protect_sensitive_files']) {
+			$lines[] = '';
+			$lines[] = '# Protect sensitive files';
+			$lines[] = '<FilesMatch "^(\\.(htaccess|htpasswd|git|env)|wp-config\\.php|config\\.php|configuration\\.php|.*\\.log|.*\\.ini|.*\\.json)$">';
+			$lines[] = "\tOrder allow,deny";
+			$lines[] = "\tDeny from all";
 			$lines[] = '</FilesMatch>';
+		}
+
+		// Block PHP Upload Execution
+		if ($this->config['block_php_upload_exec']) {
+			$lines[] = '';
+			$lines[] = '# Block PHP execution in upload directories';
+			$lines[] = '<DirectoryMatch "/uploads/">';
+			$lines[] = "\tphp_admin_flag engine off";
+			$lines[] = '</DirectoryMatch>';
 		}
 
 		// File Upload Protection
 		if ($this->config['file_upload_protection']) {
-			$lines[] = "\t<FilesMatch \"(?i)\\.(php|php3|php4|php5|phtml|phptml|exe|pl|py|jsp|asp|htm|shtml|sh|cgi|dll)$\">";
-			$lines[] = "\t\tOrder Deny,Allow";
-			$lines[] = "\t\tDeny from All";
-			$lines[] = "\t</FilesMatch>";
+			$lines[] = '';
+			$lines[] = '# Block dangerous file uploads';
+			$lines[] = '<FilesMatch "\\.(php|php3|php4|php5|phtml|phptml|exe|pl|py|jsp|asp|htm|shtml|sh|cgi|dll)$">';
+			$lines[] = "\tOrder Deny,Allow";
+			$lines[] = "\tDeny from all";
+			$lines[] = '</FilesMatch>';
 		}
 
 		// WordPress Admin Protection
 		if ($this->config['protect_wp_admin']) {
-			$lines[] = "\t<Files wp-login.php>";
-			$lines[] = "\t\tOrder Deny,Allow";
+			$lines[] = '';
+			$lines[] = '# WordPress Admin Protection';
+			$lines[] = '<Files "wp-login.php">';
+			$lines[] = "\tOrder Deny,Allow";
+			$lines[] = "\tDeny from all";
+			if (!empty($this->config['ip_whitelist'])) {
+				foreach ($this->config['ip_whitelist'] as $ip) {
+					$lines[] = "\tAllow from $ip";
+				}
+			}
+			$lines[] = '</Files>';
+		}
+
+		// Protect PHP Files
+		if ($this->config['protect_php_files']) {
+			$lines[] = '';
+			$lines[] = '# Protect PHP files from direct access';
+			$lines[] = '<FilesMatch "\\.php$">';
+			$lines[] = "\tOrder Allow,Deny";
+			$lines[] = "\tAllow from all";
+			$lines[] = "\t# Deny access to specific PHP files";
+			$lines[] = "\t<FilesMatch \"(config|install|upgrade|admin)\\.php$\">";
 			$lines[] = "\t\tDeny from all";
-			$lines[] = "\t\tAllow from " . implode(' ', $this->config['ip_whitelist']);
-			$lines[] = "\t</Files>";
-		}
-
-		// Enhanced and Additional Security Headers
-		if ($this->config['security_headers'] || $this->config['additional_security_headers']) {
-			$lines[] = "\t<IfModule mod_headers.c>";
-			$lines[] = "\t\tHeader set X-Content-Type-Options \"nosniff\"";
-			$lines[] = "\t\tHeader set X-Frame-Options \"SAMEORIGIN\"";
-			$lines[] = "\t\tHeader set X-XSS-Protection \"1; mode=block\"";
-			if ($this->config['security_headers']) {
-				$lines[] = "\t\tHeader set Referrer-Policy \"strict-origin-when-cross-origin\"";
-				$lines[] = "\t\tHeader set Permissions-Policy \"geolocation=(), midi=(), sync-xhr=(), microphone=(), camera=(), magnetometer=(), gyroscope=(), fullscreen=(self), payment=()\"";
-				$lines[] = "\t\tHeader set Cross-Origin-Embedder-Policy \"require-corp\"";
-				$lines[] = "\t\tHeader set Cross-Origin-Opener-Policy \"same-origin\"";
-				$lines[] = "\t\tHeader set Cross-Origin-Resource-Policy \"same-origin\"";
-			}
-			$lines[] = "\t</IfModule>";
-		}
-
-		// Enhanced Content Security Policy
-		if ($this->config['content_security_policy']) {
-			$csp = [
-				"\tdefault-src 'self'",
-				"\tscript-src 'self' 'strict-dynamic' 'nonce-{RANDOM}' 'unsafe-inline' 'unsafe-eval'",
-				"\tstyle-src 'self' 'unsafe-inline'",
-				"\timg-src 'self' data: https:",
-				"\tfont-src 'self'",
-				"\tconnect-src 'self'",
-				"\tmedia-src 'self'",
-				"\tobject-src 'none'",
-				"\tframe-src 'self'",
-				"\tworker-src 'self'",
-				"\tframe-ancestors 'self'",
-				"\tform-action 'self'",
-				"\tbase-uri 'self'",
-				"\tmanifest-src 'self'",
-				"\tupgrade-insecure-requests",
-				"\tblock-all-mixed-content"
-			];
-
-			if (!empty($this->config['cdn_domains']) && is_array($this->config['cdn_domains'])) {
-				$cdn_list = implode(' ', $this->config['cdn_domains']);
-				$csp[1] .= " {$cdn_list}";
-				$csp[2] .= " {$cdn_list}";
-				$csp[3] .= " {$cdn_list}";
-			}
-
-			$lines[] = "\tHeader set Content-Security-Policy '" . implode('; ', $csp) . "'";
-			$lines[] = "# Note: Replace 'nonce-{RANDOM}' with an actual nonce value if using nonces";
-		}
-		
-		// CORS Headers with Enhanced Security
-		if ($this->config['cors_headers'] && !empty($this->config['cors_domains']) && is_array($this->config['cors_domains'])) {
-			$domains = implode('|', array_map('preg_quote', $this->config['cors_domains']));
-			$lines[] = '<IfModule mod_headers.c>';
-			$lines[] = "SetEnvIf Origin \"^https://([^/]+)$\" CORS_DOMAIN=$0";
-			$lines[] = "Header set Access-Control-Allow-Origin %{CORS_DOMAIN}e env=CORS_DOMAIN";
-			$lines[] = "Header set Access-Control-Allow-Methods \"GET, POST, OPTIONS\"";
-			$lines[] = "Header set Access-Control-Allow-Headers \"Content-Type, Authorization, X-Requested-With\"";
-			$lines[] = "Header set Access-Control-Allow-Credentials true";
-			$lines[] = "Header set Access-Control-Max-Age 3600";
-			$lines[] = "Header set Vary \"Origin\"";
-			$lines[] = '</IfModule>';
-		}
-
-		// Protection Against Common Attacks
-		$lines[] = '# Prevent Apache from serving .ht* files';
-		$lines[] = '<FilesMatch "^\.ht">';
-		$lines[] = 'Order allow,deny';
-		$lines[] = 'Deny from all';
-		$lines[] = 'Satisfy All';
-		$lines[] = '</FilesMatch>';
-
-		// Block Access to Backup and Source Files
-		$lines[] = '<FilesMatch "(\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$">';
-		$lines[] = 'Order allow,deny';
-		$lines[] = 'Deny from all';
-		$lines[] = 'Satisfy All';
-		$lines[] = '</FilesMatch>';
-
-		// Prevent Directory Browsing
-		$lines[] = 'Options All -Indexes';
-
-		// Gzip Compression
-		if ($this->config['enable_gzip_compression'] || $this->config['compression']) {
-			$lines[] = '<IfModule mod_deflate.c>';
-			$lines[] = 'SetOutputFilter DEFLATE';
-			$lines[] = 'AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/xml application/xml+rss application/xhtml+xml application/rss+xml application/json';
-			$lines[] = 'SetEnvIfNoCase Request_URI \\.(?:gif|jpe?g|png|pdf)$ no-gzip dont-vary';
-			$lines[] = '</IfModule>';
-		}
-
-		// Access Control
-		if ($this->config['access_control_enabled']) {
-			foreach ($this->config['access_control_list'] as $entry) {
-				$lines[] = 'Require not ip ' . $entry; // Example for IP control
-				// $lines[] = 'BrowserMatchNoCase "' . $entry . '" bad_bot'; // Example for User Agent control
-			}
-		}
-
-		// Custom MIME Types
-		foreach ($this->config['custom_mime_types'] as $mime_type) {
-			list($extension, $type) = explode(' ', $mime_type);
-			$lines[] = 'AddType ' . $type . ' ' . $extension;
-		}
-
-		// WWW/Non-WWW Redirection
-		if ($this->config['www_redirection'] === 'www') {
-			$lines[] = 'RewriteCond %{HTTP_HOST} !^www\. [NC]';
-			$lines[] = 'RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [R=301,L]';
-		} elseif ($this->config['www_redirection'] === 'non-www') {
-			$lines[] = 'RewriteCond %{HTTP_HOST} ^www\. [NC]';
-			$lines[] = 'RewriteRule ^(.*)$ http://%{HTTP_HOST}/$1 [R=301,L]';
-		}
-
-		// SSL Forcing
-		if ($this->config['ssl_forcing'] === 'entire-site') {
-			$lines[] = 'RewriteCond %{HTTPS} off';
-			$lines[] = 'RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]';
-		} elseif ($this->config['ssl_forcing'] === 'specific-sections') {
-			// Example: Add specific logic for sections
-			// $lines[] = "RewriteCond %{REQUEST_URI} ^/secure/ [NC]";
-			// $lines[] = "RewriteCond %{HTTPS} off";
-			// $lines[] = "RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]";
-		}
-
-		// Custom Error Pages
-		foreach ($this->config['error_pages'] as $code => $path) {
-			if ($path !== null) {
-				$path = $path ?? '';
-				$lines[] = "ErrorDocument $code $path";
-			}
-		}
-
-		// Custom Rules
-		if (!empty($this->config['custom_rules'])) {
-			$lines = array_merge($lines, $this->config['custom_rules']);
-		}
-
-		// Redirect Management
-		if ($this->config['redirect_management_enabled']) {
-			foreach ($this->config['redirect_list'] as $redirect) {
-				list($old_url, $new_url, $type) = explode(' ', $redirect);
-				$lines[] = 'Redirect ' . $type . ' ' . $old_url . ' ' . $new_url;
-			}
+			$lines[] = "\t</FilesMatch>";
+			$lines[] = '</FilesMatch>';
 		}
 
 		// Hotlink Protection
 		if ($this->config['hotlink_protection_enabled']) {
-			$lines[] = 'RewriteEngine on';
-			$lines[] = 'RewriteCond %{HTTP_REFERER} !^$';
-			$lines[] = 'RewriteCond %{HTTP_REFERER} !^http(s)?://(www\.)?yourdomain.com [NC]';
-			$lines[] = 'RewriteRule \.(jpg|jpeg|png|gif)$ - [F,NC]';
+			$lines[] = '';
+			$lines[] = '# Hotlink Protection';
+			$lines[] = 'RewriteCond %{HTTP_REFERER} !^';
+
+			$allowedDomains = [$this->config['domain']];
+			if (!empty($this->config['hotlink_protection_list'])) {
+				$allowedDomains = array_merge($allowedDomains, $this->config['hotlink_protection_list']);
+			}
+
+			foreach ($allowedDomains as $domain) {
+				if (!empty($domain)) {
+					$lines[] = "RewriteCond %{HTTP_REFERER} !^https?://(www\\.)?$domain [NC]";
+				}
+			}
+
+			$lines[] = 'RewriteRule \\.(jpg|jpeg|png|gif|bmp|webp)$ - [F,NC]';
 		}
 
-		return implode("\n", $lines);
+		// Block Access to Backup and Source Files
+		$lines[] = '';
+		$lines[] = '# Block access to backup and source files';
+		$lines[] = '<FilesMatch "(\\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist)|~)$">';
+		$lines[] = "\tOrder allow,deny";
+		$lines[] = "\tDeny from all";
+		$lines[] = "\tSatisfy All";
+		$lines[] = '</FilesMatch>';
+
+		// Prevent access to .ht* files
+		$lines[] = '';
+		$lines[] = '# Prevent Apache from serving .ht* files';
+		$lines[] = '<FilesMatch "^\\.ht">';
+		$lines[] = "\tOrder allow,deny";
+		$lines[] = "\tDeny from all";
+		$lines[] = "\tSatisfy All";
+		$lines[] = '</FilesMatch>';
+
+		$lines[] = '';
+	}
+
+	/**
+	 * Add error page configurations
+	 */
+	private function addErrorPages(array &$lines): void {
+		$hasErrorPages = false;
+		foreach ($this->config['error_pages'] as $code => $path) {
+			if ($path !== null && !empty($path)) {
+				if (!$hasErrorPages) {
+					$lines[] = '# ================================';
+					$lines[] = '# CUSTOM ERROR PAGES';
+					$lines[] = '# ================================';
+					$lines[] = '';
+					$hasErrorPages = true;
+				}
+				$lines[] = "ErrorDocument $code $path";
+			}
+		}
+
+		if ($hasErrorPages) {
+			$lines[] = '';
+		}
+	}
+
+	/**
+	 * Add custom configurations
+	 */
+	private function addCustomConfigurations(array &$lines): void {
+		// Custom MIME Types
+		if ($this->config['custom_mime_types_enabled'] && !empty($this->config['custom_mime_types'])) {
+			$lines[] = '# ================================';
+			$lines[] = '# CUSTOM MIME TYPES';
+			$lines[] = '# ================================';
+			$lines[] = '';
+
+			foreach ($this->config['custom_mime_types'] as $mimeType) {
+				$parts = explode(' ', trim($mimeType), 2);
+				if (count($parts) === 2) {
+					[$extension, $type] = $parts;
+					$lines[] = "AddType $type $extension";
+				}
+			}
+			$lines[] = '';
+		}
+
+		// Custom Document Root
+		if ($this->config['custom_document_root']) {
+			$lines[] = '# Custom Document Root';
+			$lines[] = 'DocumentRoot "' . $this->config['custom_document_root'] . '"';
+			$lines[] = '';
+		}
+
+		// Image Placeholder
+		if ($this->config['image_placeholder']) {
+			$lines[] = '# Image Placeholder for Missing Images';
+			$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-f';
+			$lines[] = 'RewriteCond %{REQUEST_URI} \\.(gif|jpe?g|png|webp)$ [NC]';
+			$lines[] = 'RewriteRule . ' . $this->config['image_placeholder'] . ' [L]';
+			$lines[] = '';
+		}
+
+		// Custom Rules
+		if (!empty($this->config['custom_rules'])) {
+			$lines[] = '# ================================';
+			$lines[] = '# CUSTOM RULES';
+			$lines[] = '# ================================';
+			$lines[] = '';
+
+			foreach ($this->config['custom_rules'] as $rule) {
+				$lines[] = $rule;
+			}
+			$lines[] = '';
+		}
+
+		// Final security measures
+		$lines[] = '# ================================';
+		$lines[] = '# FINAL SECURITY MEASURES';
+		$lines[] = '# ================================';
+		$lines[] = '';
+		$lines[] = '# Prevent directory browsing';
+		$lines[] = 'Options All -Indexes';
+		$lines[] = '';
+		$lines[] = '# Disable server signature';
+		$lines[] = 'ServerSignature Off';
+		$lines[] = '';
+		$lines[] = '# End of .htaccess file';
 	}
 
 	/**
 	 * Save the generated content to a file
 	 */
-	public function saveToFile(string $filePath): void
-	{
+	public function saveToFile(string $filePath): void {
 		$content = $this->generate();
-		file_put_contents($filePath, $content);
+
+		// Create directory if it doesn't exist
+		$directory = dirname($filePath);
+		if (!is_dir($directory)) {
+			mkdir($directory, 0755, true);
+		}
+
+		if (file_put_contents($filePath, $content) === false) {
+			throw new \Exception("Failed to write .htaccess file to: $filePath");
+		}
+	}
+
+	/**
+	 * Get configuration value
+	 */
+	public function getConfig(string $key = null): mixed {
+		if ($key === null) {
+			return $this->config;
+		}
+
+		return $this->config[$key] ?? null;
+	}
+
+	/**
+	 * Validate configuration before generation
+	 */
+	public function validateConfig(): array {
+		$errors = [];
+
+		// Validate domain format
+		if (!empty($this->config['domain']) && !filter_var("http://{$this->config['domain']}", FILTER_VALIDATE_URL)) {
+			$errors[] = "Invalid domain format: {$this->config['domain']}";
+		}
+
+		// Validate IP addresses in blacklist
+		foreach ($this->config['ip_blacklist'] as $ip) {
+			if (!filter_var($ip, FILTER_VALIDATE_IP) && !$this->isValidCIDR($ip)) {
+				$errors[] = "Invalid IP address in blacklist: $ip";
+			}
+		}
+
+		// Validate IP addresses in whitelist
+		foreach ($this->config['ip_whitelist'] as $ip) {
+			if (!filter_var($ip, FILTER_VALIDATE_IP) && !$this->isValidCIDR($ip)) {
+				$errors[] = "Invalid IP address in whitelist: $ip";
+			}
+		}
+
+		// Validate country codes
+		foreach ($this->config['country_blacklist'] as $country) {
+			if (!preg_match('/^[A-Z]{2}$/', $country)) {
+				$errors[] = "Invalid country code: $country (must be 2-letter ISO code)";
+			}
+		}
+
+		// Validate redirect format
+		if ($this->config['redirect_management_enabled']) {
+			foreach ($this->config['redirect_list'] as $redirect) {
+				$parts = explode(' ', trim($redirect));
+				if (count($parts) !== 3 || !in_array($parts[2], ['301', '302', '307'])) {
+					$errors[] = "Invalid redirect format: $redirect (should be 'old_url new_url redirect_code')";
+				}
+			}
+		}
+
+		// Validate error page paths
+		foreach ($this->config['error_pages'] as $code => $path) {
+			if ($path !== null && !empty($path) && !str_starts_with($path, '/')) {
+				$errors[] = "Error page path for $code should start with '/': $path";
+			}
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Check if IP address is valid CIDR notation
+	 */
+	private function isValidCIDR(string $cidr): bool {
+		$parts = explode('/', $cidr);
+		if (count($parts) !== 2) {
+			return false;
+		}
+
+		[$ip, $netmask] = $parts;
+
+		if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+			return false;
+		}
+
+		$netmask = (int) $netmask;
+		$maxBits = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ? 32 : 128;
+
+		return $netmask >= 0 && $netmask <= $maxBits;
 	}
 }
