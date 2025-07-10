@@ -1,6 +1,6 @@
 <?php
 
-namespace Yohns\Generators;
+namespace YoBuild\Generators;
 
 /**
  * Enhanced Security Htaccess Generator with comprehensive protection measures

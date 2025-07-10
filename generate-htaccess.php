@@ -14,9 +14,9 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/src/HtaccessGenerator.php';
+require_once __DIR__ . '/../src/HtaccessGenerator.php';
 
-use Yohns\Generators\HtaccessGenerator;
+use YoBuild\Generators\HtaccessGenerator;
 
 /**
  * Display usage information
@@ -27,17 +27,17 @@ function displayUsage(): void
 	echo "╔══════════════════════════════════════════════════════════════╗\n";
 	echo "║                    .htaccess Generator                       ║\n";
 	echo "╠══════════════════════════════════════════════════════════════╣\n";
-	echo "║ Usage: php generate-htaccess.php [config-file] [output-file] ║\n";
+	echo "║ Usage: php generate-htaccess2.php [config-file] [output-file] ║\n";
 	echo "║                                                              ║\n";
 	echo "║ Arguments:                                                   ║\n";
 	echo "║   config-file  : Path to configuration file (default: config.php) ║\n";
 	echo "║   output-file  : Path to output file (default: .htaccess)   ║\n";
 	echo "║                                                              ║\n";
 	echo "║ Examples:                                                    ║\n";
-	echo "║   php generate-htaccess.php                                  ║\n";
-	echo "║   php generate-htaccess.php config.php                      ║\n";
-	echo "║   php generate-htaccess.php config.php .htaccess            ║\n";
-	echo "║   php generate-htaccess.php custom.php output/.htaccess     ║\n";
+	echo "║   php generate-htaccess2.php                                  ║\n";
+	echo "║   php generate-htaccess2.php config.php                      ║\n";
+	echo "║   php generate-htaccess2.php config.php .htaccess            ║\n";
+	echo "║   php generate-htaccess2.php custom.php output/.htaccess     ║\n";
 	echo "╚══════════════════════════════════════════════════════════════╝\n";
 	echo "\n";
 }
@@ -180,6 +180,9 @@ function displayConfigSummary(array $config): void
 		'Force HTTPS' => ($config['force_https'] ?? false) ? '✅ Yes' : '❌ No',
 		'Security Headers' => ($config['security_headers'] ?? false) ? '✅ Enabled' : '❌ Disabled',
 		'Compression' => ($config['compression'] ?? false) ? '✅ Enabled' : '❌ Disabled',
+		'Pretty URLs' => ($config['pretty_urls'] ?? false) ?
+			'✅ Enabled (' . ($config['pretty_urls_config']['mode'] ?? 'front-controller') .
+			' → ' . ($config['pretty_urls_config']['handler_file'] ?? 'index.php') . ')' : '❌ Disabled',
 		'Rate Limiting' => ($config['request_rate_limiting'] ?? false) ?
 			'✅ Enabled (' . ($config['max_requests_per_second'] ?? 10) . ' req/sec)' : '❌ Disabled',
 		'WWW Redirection' => $config['www_redirection'] ?? 'none',
@@ -424,7 +427,7 @@ try {
 	}
 
 	// Check if HtaccessGenerator class is available
-	if (!class_exists('Yohns\Generators\HtaccessGenerator')) {
+	if (!class_exists('YoBuild\Generators\HtaccessGenerator')) {
 		colorOutput("❌ HtaccessGenerator class not found!\n", 'red');
 		colorOutput("   Please ensure src/HtaccessGenerator.php exists and is accessible.\n", 'yellow');
 		colorOutput("   Current working directory: " . getcwd() . "\n", 'yellow');

@@ -1,5 +1,5 @@
 <?php
-use Yohns\Generators\HtaccessGenerator;
+use YoBuild\Generators\HtaccessGenerator;
 
 require_once 'src/HtaccessGenerator.php';
 

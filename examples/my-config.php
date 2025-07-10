@@ -7,7 +7,7 @@
  * Copy this file to create your own configuration.
  */
 
-$domain = 'mywebsite.com';
+$domain = 'example.com';
 
 return [
 	'htaccess_config' => [
@@ -39,7 +39,7 @@ return [
 		'max_requests_per_second' => 15,
 
 		// URL preferences
-		'www_redirection' => 'non-www',  // Redirect www.mywebsite.com to mywebsite.com
+		'www_redirection' => 'non-www',  // Redirect www.example.com to example.com
 
 		// Cache settings for better performance
 		'cache_html_duration' => '1 week',

@@ -1,0 +1,43 @@
+{
+	"name": "yobuild/htaccess-generator",
+	"description": "Enhanced .htaccess generator with comprehensive security, performance, and pretty URLs configuration",
+	"type": "library",
+	"keywords": [
+		"htaccess",
+		"apache",
+		"security",
+		"performance",
+		"url-rewriting",
+		"php"
+	],
+	"homepage": "https://github.com/YoBuild/htaccess-generator",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Yohn",
+			"email": "yohns@live.com",
+			"homepage": "https://github.com/Yohn",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=8.2"
+	},
+	"autoload": {
+		"psr-4": {
+			"YoBuild\\Generators\\": "src/"
+		}
+	},
+	"scripts": {
+		"generate": "php bin/generate-htaccess"
+	},
+	"bin": [
+		"bin/generate-htaccess"
+	],
+	"config": {
+		"sort-packages": true,
+		"optimize-autoloader": true
+	},
+	"minimum-stability": "stable",
+	"prefer-stable": true
+}

@@ -1,43 +1,53 @@
+#!/usr/bin/env php
 <?php
 
 /**
- * Command Line .htaccess Generator Script
+ * Command Line .htaccess Generator Script - Composer Version
  *
  * Usage:
- *   php generate-htaccess.php [config-file] [output-file]
+ *   vendor/bin/generate-htaccess [config-file] [output-file]
+ *   composer run generate [config-file] [output-file]
  *
  * Examples:
- *   php generate-htaccess.php config.php .htaccess
- *   php generate-htaccess.php custom-config.php output/.htaccess
- *   php generate-htaccess.php (uses config.php and outputs to .htaccess)
+ *   vendor/bin/generate-htaccess examples/config.php .htaccess
+ *   composer run generate examples/simple-config.php .htaccess
  */
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/src/HtaccessGenerator.php';
+// Auto-detect if running via Composer or standalone
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+	// Running from vendor/bin (installed via Composer)
+	require_once __DIR__ . '/../vendor/autoload.php';
+} elseif (file_exists(__DIR__ . '/../../../autoload.php')) {
+	// Running as a dependency in another project
+	require_once __DIR__ . '/../../../autoload.php';
+} else {
+	// Fallback for standalone usage
+	require_once __DIR__ . '/../src/HtaccessGenerator.php';
+}
 
-use Yohns\Generators\HtaccessGenerator;
+use YoBuild\Generators\HtaccessGenerator;
 
 /**
  * Display usage information
  */
-function displayUsage(): void
-{
+function displayUsage(): void {
 	echo "\n";
 	echo "╔══════════════════════════════════════════════════════════════╗\n";
 	echo "║                    .htaccess Generator                       ║\n";
 	echo "╠══════════════════════════════════════════════════════════════╣\n";
-	echo "║ Usage: php generate-htaccess2.php [config-file] [output-file] ║\n";
+	echo "║ Usage: vendor/bin/generate-htaccess [config-file] [output-file] ║\n";
 	echo "║                                                              ║\n";
 	echo "║ Arguments:                                                   ║\n";
-	echo "║   config-file  : Path to configuration file (default: config.php) ║\n";
+	echo "║   config-file  : Path to configuration file                 ║\n";
 	echo "║   output-file  : Path to output file (default: .htaccess)   ║\n";
 	echo "║                                                              ║\n";
 	echo "║ Examples:                                                    ║\n";
-	echo "║   php generate-htaccess2.php                                  ║\n";
-	echo "║   php generate-htaccess2.php config.php                      ║\n";
-	echo "║   php generate-htaccess2.php config.php .htaccess            ║\n";
-	echo "║   php generate-htaccess2.php custom.php output/.htaccess     ║\n";
+	echo "║   vendor/bin/generate-htaccess                               ║\n";
+	echo "║   vendor/bin/generate-htaccess examples/config.php          ║\n";
+	echo "║   vendor/bin/generate-htaccess config.php .htaccess         ║\n";
+	echo "║   composer run generate examples/simple-config.php          ║\n";
 	echo "╚══════════════════════════════════════════════════════════════╝\n";
 	echo "\n";
 }
@@ -45,8 +55,7 @@ function displayUsage(): void
 /**
  * Display colored console output
  */
-function colorOutput(string $text, string $color = 'white'): void
-{
+function colorOutput(string $text, string $color = 'white'): void {
 	$colors = [
 		'red'     => "\033[31m",
 		'green'   => "\033[32m",
@@ -64,10 +73,21 @@ function colorOutput(string $text, string $color = 'white'): void
 /**
  * Load and validate configuration file
  */
-function loadConfig(string $configFile): array
-{
+function loadConfig(string $configFile): array {
 	if (!file_exists($configFile)) {
 		colorOutput("❌ Error: Configuration file '$configFile' not found!\n", 'red');
+
+		// Suggest available example configs
+		$exampleDir = __DIR__ . '/../examples/';
+		if (is_dir($exampleDir)) {
+			colorOutput("💡 Available example configs:\n", 'yellow');
+			$examples = glob($exampleDir . '*.php');
+			foreach ($examples as $example) {
+				colorOutput("   - " . basename($example) . "\n", 'cyan');
+			}
+			colorOutput("\n   Usage: vendor/bin/generate-htaccess examples/config.php\n", 'white');
+		}
+
 		exit(1);
 	}
 
@@ -89,8 +109,7 @@ function loadConfig(string $configFile): array
 /**
  * Process string arrays (convert comma-separated strings to arrays)
  */
-function processStringArrays(array $config): array
-{
+function processStringArrays(array $config): array {
 	$arrayFields = [
 		'cdn_domains',
 		'cors_domains',
@@ -119,8 +138,7 @@ function processStringArrays(array $config): array
 /**
  * Validate configuration values
  */
-function validateConfig(array $config): array
-{
+function validateConfig(array $config): array {
 	$errors = [];
 
 	// Validate www_redirection
@@ -151,46 +169,32 @@ function validateConfig(array $config): array
 		$errors[] = "max_requests_per_second must be a positive integer";
 	}
 
-	// Validate SSL requirements
-	if (isset($config['ssl_requirements'])) {
-		if (isset($config['ssl_requirements']['min_version']) &&
-			!in_array($config['ssl_requirements']['min_version'], ['TLSv1.2', 'TLSv1.3'])) {
-			$errors[] = "ssl_requirements.min_version must be 'TLSv1.2' or 'TLSv1.3'";
-		}
-
-		if (isset($config['ssl_requirements']['hsts_max_age']) &&
-			(!is_numeric($config['ssl_requirements']['hsts_max_age']) || $config['ssl_requirements']['hsts_max_age'] < 1)) {
-			$errors[] = "ssl_requirements.hsts_max_age must be a positive integer";
-		}
-	}
-
 	return $errors;
 }
 
 /**
  * Display configuration summary
  */
-function displayConfigSummary(array $config): void
-{
+function displayConfigSummary(array $config): void {
 	colorOutput("\n📋 Configuration Summary:\n", 'cyan');
 	colorOutput("─────────────────────────\n", 'blue');
 
 	$summary = [
-		'Domain' => $config['domain'] ?? 'Not set',
-		'Force HTTPS' => ($config['force_https'] ?? false) ? '✅ Yes' : '❌ No',
+		'Domain'           => $config['domain'] ?? 'Not set',
+		'Force HTTPS'      => ($config['force_https'] ?? false) ? '✅ Yes' : '❌ No',
 		'Security Headers' => ($config['security_headers'] ?? false) ? '✅ Enabled' : '❌ Disabled',
-		'Compression' => ($config['compression'] ?? false) ? '✅ Enabled' : '❌ Disabled',
-		'Pretty URLs' => ($config['pretty_urls'] ?? false) ?
+		'Compression'      => ($config['compression'] ?? false) ? '✅ Enabled' : '❌ Disabled',
+		'Pretty URLs'      => ($config['pretty_urls'] ?? false) ?
 			'✅ Enabled (' . ($config['pretty_urls_config']['mode'] ?? 'front-controller') .
 			' → ' . ($config['pretty_urls_config']['handler_file'] ?? 'index.php') . ')' : '❌ Disabled',
-		'Rate Limiting' => ($config['request_rate_limiting'] ?? false) ?
+		'Rate Limiting'    => ($config['request_rate_limiting'] ?? false) ?
 			'✅ Enabled (' . ($config['max_requests_per_second'] ?? 10) . ' req/sec)' : '❌ Disabled',
-		'WWW Redirection' => $config['www_redirection'] ?? 'none',
-		'IP Blacklist' => !empty($config['ip_blacklist']) ?
+		'WWW Redirection'  => $config['www_redirection'] ?? 'none',
+		'IP Blacklist'     => !empty($config['ip_blacklist']) ?
 			'✅ ' . count($config['ip_blacklist']) . ' IPs blocked' : '❌ None',
-		'CDN Domains' => !empty($config['cdn_domains']) ?
+		'CDN Domains'      => !empty($config['cdn_domains']) ?
 			'✅ ' . count($config['cdn_domains']) . ' domains' : '❌ None',
-		'Custom Rules' => !empty($config['custom_rules']) ?
+		'Custom Rules'     => !empty($config['custom_rules']) ?
 			'✅ ' . count($config['custom_rules']) . ' rules' : '❌ None'
 	];
 
@@ -204,12 +208,11 @@ function displayConfigSummary(array $config): void
 /**
  * Main execution function
  */
-function main(): void
-{
+function main(): void {
 	global $argv;
 
 	// Parse command line arguments
-	$configFile = $argv[1] ?? 'config.php';
+	$configFile = $argv[1] ?? 'examples/config.php';
 	$outputFile = $argv[2] ?? '.htaccess';
 
 	// Display header
@@ -326,8 +329,7 @@ function main(): void
 /**
  * Format bytes into human readable format
  */
-function formatBytes(int $bytes, int $precision = 2): string
-{
+function formatBytes(int $bytes, int $precision = 2): string {
 	$units = ['B', 'KB', 'MB', 'GB'];
 
 	for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
@@ -340,8 +342,7 @@ function formatBytes(int $bytes, int $precision = 2): string
 /**
  * Handle script arguments and help
  */
-function handleArguments(): void
-{
+function handleArguments(): void {
 	global $argv;
 
 	if (isset($argv[1]) && in_array($argv[1], ['-h', '--help', 'help'])) {
@@ -350,7 +351,7 @@ function handleArguments(): void
 	}
 
 	if (isset($argv[1]) && in_array($argv[1], ['-v', '--version', 'version'])) {
-		colorOutput("🔧 .htaccess Generator v2.0\n", 'green');
+		colorOutput("🔧 .htaccess Generator v2.0 (Composer Edition)\n", 'green');
 		colorOutput("Enhanced configuration-based generator\n", 'white');
 		colorOutput("Built with PHP " . PHP_VERSION . "\n\n", 'blue');
 		exit(0);
@@ -358,52 +359,13 @@ function handleArguments(): void
 }
 
 /**
- * Perform system checks
- */
-function performSystemChecks(): bool
-{
-	$errors = [];
-
-	// Check if we're running from command line
-	if (php_sapi_name() !== 'cli') {
-		$errors[] = "This script must be run from the command line!";
-	}
-
-	// Check PHP version
-	if (version_compare(PHP_VERSION, '8.2.0', '<')) {
-		$errors[] = "PHP 8.2 or higher is required. Current version: " . PHP_VERSION;
-	}
-
-	// Check if HtaccessGenerator class exists
-	if (!file_exists(__DIR__ . '/src/HtaccessGenerator.php')) {
-		$errors[] = "HtaccessGenerator class file not found: src/HtaccessGenerator.php";
-	}
-
-	// Check write permissions
-	if (!is_writable('.')) {
-		$errors[] = "Current directory is not writable. Please check permissions.";
-	}
-
-	if (!empty($errors)) {
-		colorOutput("❌ System Check Failed:\n", 'red');
-		foreach ($errors as $error) {
-			colorOutput("   • $error\n", 'red');
-		}
-		return false;
-	}
-
-	return true;
-}
-
-/**
  * Display startup banner
  */
-function displayBanner(): void
-{
+function displayBanner(): void {
 	colorOutput("\n", 'white');
 	colorOutput("╔════════════════════════════════════════════════════════════════╗\n", 'blue');
 	colorOutput("║                      .htaccess Generator                       ║\n", 'blue');
-	colorOutput("║                    Enhanced Edition v2.0                      ║\n", 'blue');
+	colorOutput("║                   Composer Library v2.0                       ║\n", 'blue');
 	colorOutput("╠════════════════════════════════════════════════════════════════╣\n", 'blue');
 	colorOutput("║  🔒 Advanced Security  🚀 Performance  ⚙️  Highly Configurable ║\n", 'blue');
 	colorOutput("╚════════════════════════════════════════════════════════════════╝\n", 'blue');
@@ -421,16 +383,23 @@ try {
 	// Display banner
 	displayBanner();
 
-	// Perform system checks
-	if (!performSystemChecks()) {
+	// Check if we're running from command line
+	if (php_sapi_name() !== 'cli') {
+		colorOutput("❌ This script must be run from the command line!\n", 'red');
+		exit(1);
+	}
+
+	// Check PHP version
+	if (version_compare(PHP_VERSION, '8.2.0', '<')) {
+		colorOutput("❌ PHP 8.2 or higher is required. Current version: " . PHP_VERSION . "\n", 'red');
 		exit(1);
 	}
 
 	// Check if HtaccessGenerator class is available
-	if (!class_exists('Yohns\Generators\HtaccessGenerator')) {
+	if (!class_exists('YoBuild\Generators\HtaccessGenerator')) {
 		colorOutput("❌ HtaccessGenerator class not found!\n", 'red');
-		colorOutput("   Please ensure src/HtaccessGenerator.php exists and is accessible.\n", 'yellow');
-		colorOutput("   Current working directory: " . getcwd() . "\n", 'yellow');
+		colorOutput("   Please ensure the package is properly installed via Composer.\n", 'yellow');
+		colorOutput("   Run: composer install\n", 'cyan');
 		exit(1);
 	}
 
