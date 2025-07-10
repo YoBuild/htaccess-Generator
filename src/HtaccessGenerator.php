@@ -8,7 +8,6 @@ namespace Yohns\Generators;
  */
 class HtaccessGenerator {
 	/** @var array Configuration values */
-
 	private array $config = [];
 
 	/**
@@ -33,6 +32,15 @@ class HtaccessGenerator {
 			'directory_indexing'          => false,
 			'force_https'                 => true,
 			'pretty_urls'                 => false,
+			'pretty_urls_config'          => [
+					'handler_file'             => 'index.php',
+					'mode'                     => 'front-controller',
+					'excluded_directories'     => ['assets', 'css', 'js', 'images', 'uploads', 'admin', 'api'],
+					'excluded_extensions'      => ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.txt', '.xml', '.json', '.pdf', '.zip', '.svg', '.woff', '.woff2', '.ttf', '.eot'],
+					'force_trailing_slash'     => false,
+					'query_string_passthrough' => true,
+					'url_parameter_name'       => 'url'
+				],
 			'compression'                 => true,
 			'use_webp'                    => true,
 			'utf8_charset'                => true,
@@ -544,14 +552,127 @@ class HtaccessGenerator {
 
 		// Pretty URLs
 		if ($this->config['pretty_urls']) {
-			$lines[] = '';
-			$lines[] = '# Pretty URLs (remove file extensions)';
-			$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-f';
-			$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-d';
-			$lines[] = 'RewriteRule ^([^.]+)$ $1.php [NC,L]';
+			$this->addPrettyURLsConfiguration($lines);
 		}
 
 		$lines[] = '';
+	}
+
+	/**
+	 * Add comprehensive pretty URLs configuration
+	 */
+	private function addPrettyURLsConfiguration(array &$lines): void {
+		$config = $this->config['pretty_urls_config'];
+		$lines[] = '';
+		$lines[] = '# ================================';
+		$lines[] = '# PRETTY URLS CONFIGURATION';
+		$lines[] = '# ================================';
+		$lines[] = '';
+
+		// Trailing slash handling
+		if ($config['force_trailing_slash']) {
+			$lines[] = '# Force trailing slash';
+			$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-f';
+			$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-d';
+			$lines[] = 'RewriteCond %{REQUEST_URI} !(.*)/$';
+			$lines[] = 'RewriteRule ^(.*)$ $1/ [L,R=301]';
+			$lines[] = '';
+		} else {
+			$lines[] = '# Remove trailing slash';
+			$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-d';
+			$lines[] = 'RewriteCond %{REQUEST_URI} (.*)/$';
+			$lines[] = 'RewriteRule ^(.*)/$ $1 [L,R=301]';
+			$lines[] = '';
+		}
+
+		// Exclude specific directories from rewriting
+		if (!empty($config['excluded_directories'])) {
+			$lines[] = '# Exclude directories from URL rewriting';
+			$excludedDirs = implode('|', array_map('preg_quote', $config['excluded_directories']));
+			$lines[] = "RewriteCond %{REQUEST_URI} !^/($excludedDirs)(/.*)?$ [NC]";
+		}
+
+		// Exclude specific file extensions
+		if (!empty($config['excluded_extensions'])) {
+			$lines[] = '# Exclude file extensions from URL rewriting';
+			$excludedExts = implode('|', array_map(function ($ext) {
+				return preg_quote(ltrim($ext, '.'));
+			}, $config['excluded_extensions']));
+			$lines[] = "RewriteCond %{REQUEST_URI} !\\\.($excludedExts)$ [NC]";
+		}
+
+		// Main pretty URLs logic based on mode
+		switch ($config['mode']) {
+			case 'front-controller':
+				$this->addFrontControllerRules($lines, $config);
+				break;
+
+			case 'extension-removal':
+				$this->addExtensionRemovalRules($lines, $config);
+				break;
+
+			case 'both':
+				$this->addFrontControllerRules($lines, $config);
+				$lines[] = '';
+				$this->addExtensionRemovalRules($lines, $config);
+				break;
+		}
+
+		$lines[] = '';
+	}
+
+	/**
+	 * Add front controller routing rules
+	 */
+	private function addFrontControllerRules(array &$lines, array $config): void {
+		$lines[] = '# Front Controller Pattern - Route all requests to ' . $config['handler_file'];
+		$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-f';
+		$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-d';
+
+		if ($config['query_string_passthrough']) {
+			// Pass the original URL as a parameter and preserve existing query string
+			$paramName = $config['url_parameter_name'];
+			$lines[] = "RewriteRule ^(.*)$ {$config['handler_file']}?{$paramName}=\$1 [QSA,L]";
+			$lines[] = '';
+			$lines[] = "# URL parameter: \$_GET['{$paramName}'] contains the requested path";
+			$lines[] = "# Query strings: Original query parameters are preserved via QSA flag";
+			$lines[] = "# Example: /blog/post-title?page=2 becomes {$config['handler_file']}?{$paramName}=blog/post-title&page=2";
+		} else {
+			$lines[] = "RewriteRule ^.*$ {$config['handler_file']} [L]";
+			$lines[] = '';
+			$lines[] = "# All requests route to {$config['handler_file']} (query strings ignored)";
+		}
+	}
+
+	/**
+	 * Add extension removal rules (traditional approach)
+	 */
+	private function addExtensionRemovalRules(array &$lines, array $config): void {
+		$lines[] = '# Extension Removal - Allow access without file extensions';
+		$lines[] = '';
+
+		// PHP files
+		$lines[] = '# Route extensionless URLs to PHP files';
+		$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-f';
+		$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-d';
+		$lines[] = 'RewriteCond %{REQUEST_FILENAME}.php -f';
+		$lines[] = 'RewriteRule ^([^.]+)$ $1.php [L]';
+		$lines[] = '';
+
+		// HTML files
+		$lines[] = '# Route extensionless URLs to HTML files';
+		$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-f';
+		$lines[] = 'RewriteCond %{REQUEST_FILENAME} !-d';
+		$lines[] = 'RewriteCond %{REQUEST_FILENAME}.html -f';
+		$lines[] = 'RewriteRule ^([^.]+)$ $1.html [L]';
+		$lines[] = '';
+
+		// Redirect .php and .html to extensionless URLs (optional)
+		$lines[] = '# Redirect .php and .html extensions to clean URLs';
+		$lines[] = 'RewriteCond %{THE_REQUEST} \s/(.+)\.php[\s?] [NC]';
+		$lines[] = 'RewriteRule ^ /%1 [R=301,L]';
+		$lines[] = 'RewriteCond %{THE_REQUEST} \s/(.+)\.html[\s?] [NC]';
+		$lines[] = 'RewriteRule ^ /%1 [R=301,L]';
 	}
 
 	/**
@@ -822,6 +943,26 @@ class HtaccessGenerator {
 		foreach ($this->config['error_pages'] as $code => $path) {
 			if ($path !== null && !empty($path) && !str_starts_with($path, '/')) {
 				$errors[] = "Error page path for $code should start with '/': $path";
+			}
+		}
+
+		// Validate pretty URLs configuration
+		if ($this->config['pretty_urls'] && isset($this->config['pretty_urls_config'])) {
+			$prettyConfig = $this->config['pretty_urls_config'];
+
+			// Validate mode
+			if (!in_array($prettyConfig['mode'], ['front-controller', 'extension-removal', 'both'])) {
+				$errors[] = "pretty_urls_config.mode must be 'front-controller', 'extension-removal', or 'both'";
+			}
+
+			// Validate handler file
+			if (empty($prettyConfig['handler_file']) || !str_ends_with($prettyConfig['handler_file'], '.php')) {
+				$errors[] = "pretty_urls_config.handler_file must be a valid PHP file path";
+			}
+
+			// Validate URL parameter name
+			if (empty($prettyConfig['url_parameter_name']) || !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $prettyConfig['url_parameter_name'])) {
+				$errors[] = "pretty_urls_config.url_parameter_name must be a valid parameter name";
 			}
 		}
 

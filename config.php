@@ -88,7 +88,108 @@ return [
 		 * Default: false
 		 * Example: /page instead of /page.php
 		 */
-		'pretty_urls' => false,
+		'pretty_urls' => true,
+
+		/**
+		 * Pretty URLs configuration
+		 * Type: array
+		 */
+		'pretty_urls_config' => [
+			/**
+			 * Handler file for pretty URLs
+			 * Type: string
+			 * Values:
+			 *   'index.php' = Route all requests to index.php (most common)
+			 *   'app.php' = Route to app.php (Symfony style)
+			 *   'router.php' = Route to custom router file
+			 *   'public/index.php' = Route to subdirectory file
+			 * Default: 'index.php'
+			 * Example: All requests like /about, /contact, /blog/post-title go to this file
+			 */
+			'handler_file' => 'index.php',
+
+			/**
+			 * Pretty URLs mode
+			 * Type: string
+			 * Values:
+			 *   'front-controller' = All requests go to handler file (recommended for frameworks)
+			 *   'extension-removal' = Remove file extensions (.php, .html) but keep direct file access
+			 *   'both' = Combine both approaches
+			 * Default: 'front-controller'
+			 */
+			'mode' => 'front-controller',
+
+			/**
+			 * Excluded directories from pretty URL rewriting
+			 * Type: array of strings
+			 * Example: ['admin', 'api', 'assets', 'uploads']
+			 * Default: ['assets', 'css', 'js', 'images', 'uploads', 'admin']
+			 * Note: These directories will serve files directly without rewriting
+			 */
+			'excluded_directories' => [
+				'assets',
+				'css',
+				'js',
+				'images',
+				'uploads',
+				'admin',
+				'api'
+			],
+
+			/**
+			 * Excluded file extensions from pretty URL rewriting
+			 * Type: array of strings
+			 * Example: ['.css', '.js', '.png', '.jpg', '.gif', '.ico', '.txt', '.xml']
+			 * Default: ['.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.ico', '.txt', '.xml', '.json']
+			 * Note: These file types will be served directly
+			 */
+			'excluded_extensions' => [
+				'.css',
+				'.js',
+				'.png',
+				'.jpg',
+				'.jpeg',
+				'.gif',
+				'.ico',
+				'.txt',
+				'.xml',
+				'.json',
+				'.pdf',
+				'.zip',
+				'.svg',
+				'.woff',
+				'.woff2',
+				'.ttf',
+				'.eot'
+			],
+
+			/**
+			 * Force trailing slash
+			 * Type: boolean
+			 * Values: true = Add trailing slash to URLs (/about/), false = Remove trailing slash (/about)
+			 * Default: false
+			 * SEO Note: Choose one approach and stick with it for consistency
+			 */
+			'force_trailing_slash' => false,
+
+			/**
+			 * Enable query string passthrough
+			 * Type: boolean
+			 * Values: true = Pass query strings to handler file, false = Ignore query strings
+			 * Default: true
+			 * Example: /page?id=123 becomes index.php?id=123&url=page
+			 */
+			'query_string_passthrough' => true,
+
+			/**
+			 * Custom query parameter name for the URL
+			 * Type: string
+			 * Default: 'url'
+			 * Example: With 'route', /about becomes index.php?route=about
+			 * Note: The handler file can access the original URL via $_GET[$this_parameter]
+			 */
+			'url_parameter_name' => 'url'
+		],
 
 		/**
 		 * Enable Gzip compression for faster loading
