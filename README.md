@@ -1,15 +1,54 @@
-# .htaccess Generator - Configuration File Usage
+# .htaccess Generator
 
-This enhanced version of the .htaccess generator uses PHP configuration files and a command-line script for easy automation and version control.
+[![PHP Version](https://img.shields.io/badge/PHP-%3E%3D8.2-blue)](https://php.net)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Composer](https://img.shields.io/badge/Composer-Package-orange)](https://packagist.org)
 
-## 📝 **Update the CLI Script Path:**## 📋 **Installation & Usage as Composer Package:**
+A comprehensive, security-focused .htaccess generator with advanced configuration options, pretty URLs support, and enterprise-level security features.
 
-### **1. Install the Package:**
+## 🚀 Features
+
+- **🔒 Advanced Security**: Content Security Policy, HSTS, XSS protection, rate limiting
+- **⚡ Performance Optimization**: Gzip compression, browser caching, WebP support
+- **🌐 Pretty URLs**: Multiple routing modes (front-controller, extension-removal, hybrid)
+- **🛡️ Access Control**: IP blacklisting/whitelisting, country blocking, bot protection
+- **⚙️ Highly Configurable**: PHP configuration files with validation
+- **🖥️ CLI Tool**: Command-line interface with colored output and progress tracking
+- **📱 Web Interface**: Bootstrap-based form for visual configuration
+- **🔄 Multiple Formats**: Support for various deployment scenarios
+
+## 📦 Installation
+
+### Via Composer (Recommended)
+
 ```bash
 composer require yobuild/htaccess-generator
 ```
 
-### **2. Use in Code:**
+### Manual Installation
+
+```bash
+git clone https://github.com/YoBuild/htaccess-generator.git
+cd htaccess-generator
+```
+
+## 🎯 Quick Start
+
+### 1. CLI Usage (Recommended)
+
+```bash
+# Using Composer
+vendor/bin/generate-htaccess examples/simple-config.php .htaccess
+
+# Using Composer scripts
+composer run generate examples/simple-config.php .htaccess
+
+# Manual usage
+php bin/generate-htaccess examples/simple-config.php .htaccess
+```
+
+### 2. PHP Code Usage
+
 ```php
 <?php
 require_once 'vendor/autoload.php';
@@ -17,596 +56,528 @@ require_once 'vendor/autoload.php';
 use YoBuild\Generators\HtaccessGenerator;
 
 $config = [
-    'domain' => 'mywebsite.com',
-    'force_https' => true,
-    'pretty_urls' => true,
-    'pretty_urls_config' => [
-        'handler_file' => 'index.php',
-        'mode' => 'front-controller'
-    ]
+	'domain' => 'mywebsite.com',
+	'force_https' => true,
+	'security_headers' => true,
+	'pretty_urls' => true,
+	'pretty_urls_config' => [
+		'handler_file' => 'index.php',
+		'mode' => 'front-controller'
+	]
 ];
 
 $generator = new HtaccessGenerator($config);
 $htaccessContent = $generator->generate();
 
 // Save to file
-file_put_contents('.htaccess', $htaccessContent);
-
-// Or use the built-in method
 $generator->saveToFile('.htaccess');
 ```
 
-### **3. Use CLI Tool:**
-```bash
-# Using vendor/bin
-vendor/bin/generate-htaccess examples/config.php .htaccess
+### 3. Web Interface Usage
 
-# Using Composer scripts
-composer run generate examples/simple-config.php .htaccess
-```
+1. Open `index.html` in your web browser
+2. Configure options using the Bootstrap form interface
+3. Click "Generate .htaccess" to create your configuration
+4. Copy the generated content to your `.htaccess` file
 
-## 🎯 **Summary - Minimal Changes Required:**
+## 📋 Configuration Options
 
-1. **Create `composer.json`** ✅ (done above)
-2. **Move files:**
-   - `generate-htaccess.php` → `bin/generate-htaccess`
-   - Config files → `examples/` directory
-3. **Keep `src/HtaccessGenerator.php` exactly where it is** ✅
+### Basic Configuration
 
----
-
-## Quick Start
-
-### 1. Setup Files
-
-Ensure you have these files in your project:
-```
-your-project/
-├── config.php                    # Your configuration file
-├── generate-htaccess.php          # Command-line script
-├── src/
-│   └── HtaccessGenerator.php      # Enhanced generator class
-├── example-config.php             # Example configuration
-└── .htaccess                      # Generated output file
-```
-
-### 2. Create Your Configuration
-
-Copy the example configuration:
-```bash
-cp example-config.php my-config.php
-```
-
-Edit `my-config.php` with your settings:
 ```php
-<?php
 return [
-    'htaccess_config' => [
-        'domain' => 'yourwebsite.com',
-        'force_https' => true,
-        'security_headers' => true,
-        // ... more settings
-    ]
+	'htaccess_config' => [
+		// Essential settings
+		'domain' => 'mywebsite.com',
+		'force_https' => true,
+		'security_headers' => true,
+		'compression' => true,
+
+		// CDN and CORS
+		'cdn_domains' => ['cdn.mywebsite.com', 'assets.mywebsite.com'],
+		'cors_domains' => ['api.mywebsite.com', 'app.mywebsite.com'],
+
+		// Performance
+		'enable_caching' => true,
+		'cache_html_duration' => '1 week',
+		'cache_images_duration' => '1 year',
+		'use_webp' => true,
+
+		// Security
+		'block_bad_bots' => true,
+		'request_rate_limiting' => true,
+		'max_requests_per_second' => 15,
+	]
 ];
 ```
 
-### 3. Generate .htaccess File
+### Pretty URLs Configuration
 
-Run the generator:
-```bash
-# Use default config.php and output to .htaccess
-php generate-htaccess.php
+The generator supports three routing modes for pretty URLs:
 
-# Use custom config file
-php generate-htaccess.php my-config.php
-
-# Use custom config and output file
-php generate-htaccess.php my-config.php output/.htaccess
+#### Front Controller (Most Common)
+```php
+'pretty_urls' => true,
+'pretty_urls_config' => [
+	'handler_file' => 'index.php',
+	'mode' => 'front-controller',
+	'excluded_directories' => ['assets', 'css', 'js', 'images', 'uploads'],
+	'url_parameter_name' => 'url' // $_GET['url'] contains the path
+]
 ```
 
-## Configuration Options
+**Generated Rewrite Rules:**
+```apache
+RewriteCond %{REQUEST_URI} !^/(assets|css|js|images|uploads)(/.*)?$ [NC]
+RewriteCond %{REQUEST_URI} !\.(css|js|png|jpg|jpeg|gif|ico|txt|xml|json)$ [NC]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+```
 
-### Basic Options
+**URL Examples:**
+- `/about` → `index.php?url=about`
+- `/blog/post-title` → `index.php?url=blog/post-title`
+- `/contact?message=hello` → `index.php?url=contact&message=hello`
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `domain` | string | `''` | Your website's main domain |
-| `cdn_domains` | array | `[]` | List of CDN domains for CSP |
-| `cors_domains` | array | `[]` | Domains allowed for CORS requests |
+#### Extension Removal
+```php
+'pretty_urls_config' => [
+	'mode' => 'extension-removal' // Remove .php/.html extensions
+]
+```
 
-### Security Features
+#### Hybrid Mode
+```php
+'pretty_urls_config' => [
+	'mode' => 'both' // Combines front-controller and extension-removal
+]
+```
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `force_https` | boolean | `true` | Redirect HTTP to HTTPS |
-| `security_headers` | boolean | `true` | Add security headers |
-| `content_security_policy` | boolean | `true` | Enable CSP protection |
-| `block_bad_bots` | boolean | `true` | Block malicious crawlers |
-| `request_rate_limiting` | boolean | `true` | Limit requests per IP |
-| `max_requests_per_second` | integer | `10` | Max requests per IP per second |
+### Security Configuration
 
-### Performance Options
+```php
+'security_headers' => true,
+'content_security_policy' => true,
+'cors_headers' => true,
+'block_bad_bots' => true,
+'protect_sensitive_files' => true,
+'file_upload_protection' => true,
+'request_rate_limiting' => true,
+'max_requests_per_second' => 10,
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `compression` | boolean | `true` | Enable Gzip compression |
-| `enable_caching` | boolean | `false` | Set browser cache headers |
-| `cache_html_duration` | string | `'1 month'` | HTML cache duration |
-| `cache_images_duration` | string | `'1 year'` | Image cache duration |
-| `use_webp` | boolean | `true` | Enable WebP image support |
+// IP Access Control
+'ip_blacklist' => ['192.168.1.100', '10.0.0.0/8'],
+'ip_whitelist' => ['203.0.113.50'], // Restrictive - only these IPs allowed
+'country_blacklist' => ['CN', 'RU'], // Block by country (requires GeoIP)
 
-### Access Control
+// SSL/TLS Configuration
+'ssl_requirements' => [
+	'min_version' => 'TLSv1.3',
+	'enforce_hsts' => true,
+	'hsts_max_age' => 31536000,
+	'include_subdomains' => true,
+	'preload' => true
+]
+```
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ip_blacklist` | array | `[]` | IPs to block |
-| `ip_whitelist` | array | `[]` | IPs to allow (blocks all others) |
-| `country_blacklist` | array | `[]` | Country codes to block |
+## 📖 Configuration Examples
 
-### URL Management
+### Simple Website
+```php
+return [
+	'htaccess_config' => [
+		'domain' => 'mywebsite.com',
+		'force_https' => true,
+		'security_headers' => true,
+		'compression' => true,
+		'www_redirection' => 'non-www'
+	]
+];
+```
 
-| Option | Type | Values | Description |
-|--------|------|--------|-------------|
-| `www_redirection` | string | `'none'`, `'www'`, `'non-www'` | WWW redirection preference |
-| `pretty_urls` | boolean | `false` | Remove file extensions from URLs |
-| `redirect_management_enabled` | boolean | `false` | Enable custom redirects |
-| `redirect_list` | array | `[]` | List of redirects |
-
-### File Protection
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `protect_sensitive_files` | boolean | `true` | Protect config files, logs, etc. |
-| `file_upload_protection` | boolean | `true` | Block dangerous file uploads |
-| `protect_wp_admin` | boolean | `false` | WordPress admin protection |
-| `hotlink_protection_enabled` | boolean | `false` | Prevent image hotlinking |
-
-## Advanced Configuration Examples
+### Modern Framework (Laravel/Symfony Style)
+```php
+return [
+	'htaccess_config' => [
+		'domain' => 'myapp.com',
+		'pretty_urls' => true,
+		'pretty_urls_config' => [
+			'handler_file' => 'public/index.php', // Framework structure
+			'mode' => 'front-controller',
+			'excluded_directories' => ['assets', 'vendor', 'storage'],
+			'url_parameter_name' => 'pathinfo'
+		],
+		'force_https' => true,
+		'security_headers' => true
+	]
+];
+```
 
 ### High-Security Website
 ```php
 return [
-    'htaccess_config' => [
-        'domain' => 'secure-site.com',
-        'force_https' => true,
-        'security_headers' => true,
-        'additional_security_headers' => true,
-        'content_security_policy' => true,
-        'request_rate_limiting' => true,
-        'max_requests_per_second' => 5,
-        'ip_blacklist' => ['192.168.1.100', '10.0.0.0/8'],
-        'country_blacklist' => ['CN', 'RU'],
-        'ssl_requirements' => [
-            'min_version' => 'TLSv1.3',
-            'enforce_hsts' => true,
-            'hsts_max_age' => 63072000, // 2 years
-            'include_subdomains' => true,
-            'preload' => true
-        ]
-    ]
-];
-```
-
-### Performance-Optimized Website
-```php
-return [
-    'htaccess_config' => [
-        'domain' => 'fast-site.com',
-        'compression' => true,
-        'enable_gzip_compression' => true,
-        'enable_caching' => true,
-        'cache_html_duration' => '1 week',
-        'cache_images_duration' => '1 year',
-        'cache_css_duration' => '6 months',
-        'cache_js_duration' => '6 months',
-        'use_webp' => true,
-        'cdn_domains' => [
-            'cdn1.fast-site.com',
-            'cdn2.fast-site.com',
-            'images.fast-site.com'
-        ]
-    ]
+	'htaccess_config' => [
+		'domain' => 'secure-site.com',
+		'force_https' => true,
+		'security_headers' => true,
+		'additional_security_headers' => true,
+		'request_rate_limiting' => true,
+		'max_requests_per_second' => 5,
+		'ip_blacklist' => ['192.168.1.100'],
+		'country_blacklist' => ['CN', 'RU'],
+		'ssl_requirements' => [
+			'min_version' => 'TLSv1.3',
+			'enforce_hsts' => true,
+			'hsts_max_age' => 63072000 // 2 years
+		]
+	]
 ];
 ```
 
 ### WordPress Website
 ```php
 return [
-    'htaccess_config' => [
-        'domain' => 'myblog.com',
-        'force_https' => true,
-        'protect_wp_admin' => true,
-        'protect_sensitive_files' => true,
-        'block_php_upload_exec' => true,
-        'pretty_urls' => true,
-        'www_redirection' => 'non-www',
-        'ip_whitelist' => ['203.0.113.50'], // Admin IP only for wp-admin
-        'error_pages' => [
-            '404' => '/404.php'
-        ]
-    ]
+	'htaccess_config' => [
+		'domain' => 'myblog.com',
+		'force_https' => true,
+		'protect_wp_admin' => true,
+		'protect_sensitive_files' => true,
+		'block_php_upload_exec' => true,
+		'www_redirection' => 'non-www',
+		'error_pages' => ['404' => '/404.php']
+	]
 ];
 ```
 
 ### E-commerce Website
 ```php
 return [
-    'htaccess_config' => [
-        'domain' => 'mystore.com',
-        'force_https' => true,
-        'security_headers' => true,
-        'content_security_policy' => true,
-        'cors_headers' => true,
-        'cors_domains' => ['api.mystore.com', 'checkout.mystore.com'],
-        'ssl_requirements' => [
-            'min_version' => 'TLSv1.2',
-            'enforce_hsts' => true,
-            'hsts_max_age' => 31536000
-        ],
-        'custom_mime_types_enabled' => true,
-        'custom_mime_types' => [
-            '.json application/json',
-            '.webp image/webp'
-        ],
-        'redirect_management_enabled' => true,
-        'redirect_list' => [
-            '/old-shop /shop 301',
-            '/products/old-category /products/new-category 301'
-        ]
-    ]
+	'htaccess_config' => [
+		'domain' => 'mystore.com',
+		'force_https' => true,
+		'security_headers' => true,
+		'cors_headers' => true,
+		'cors_domains' => ['api.mystore.com', 'checkout.mystore.com'],
+		'ssl_requirements' => [
+			'min_version' => 'TLSv1.2',
+			'enforce_hsts' => true
+		],
+		'redirect_management_enabled' => true,
+		'redirect_list' => [
+			'/old-shop /shop 301',
+			'/products/old-category /products/new-category 301'
+		]
+	]
 ];
 ```
 
-## Command Line Options
+## 🖥️ CLI Tool Features
 
-### Basic Usage
-```bash
-# Generate with default settings
-php generate-htaccess.php
-
-# Use specific config file
-php generate-htaccess.php production-config.php
-
-# Specify output location
-php generate-htaccess.php config.php /var/www/html/.htaccess
-```
-
-### Advanced Usage
-```bash
-# Development environment
-php generate-htaccess.php dev-config.php dev/.htaccess
-
-# Production environment
-php generate-htaccess.php prod-config.php dist/.htaccess
-
-# Staging environment
-php generate-htaccess.php staging-config.php staging/.htaccess
-```
-
-## Validation and Error Handling
-
-The generator includes comprehensive validation:
-
-- **IP Address Validation**: Checks blacklist/whitelist IPs
-- **Domain Format Validation**: Validates domain names
-- **Country Code Validation**: Ensures 2-letter ISO codes
-- **Redirect Format Validation**: Validates redirect syntax
-- **File Path Validation**: Checks error page paths
-
-If validation fails, the script will show detailed error messages:
+The command-line tool provides rich output with validation and progress tracking:
 
 ```bash
-❌ Configuration validation failed:
-   • Invalid IP address in blacklist: 999.999.999.999
-   • Invalid country code: USA (must be 2-letter ISO code)
-   • Invalid redirect format: /old /new (should be 'old_url new_url redirect_code')
+🚀 Starting .htaccess generation...
+
+📁 Loading configuration from: examples/config.php
+✅ Configuration loaded successfully!
+🔍 Validating configuration...
+✅ Configuration is valid!
+
+📋 Configuration Summary:
+─────────────────────────
+Domain              : mywebsite.com
+Force HTTPS         : ✅ Yes
+Security Headers    : ✅ Enabled
+Pretty URLs         : ✅ Enabled (front-controller → index.php)
+Rate Limiting       : ✅ Enabled (15 req/sec)
+WWW Redirection     : non-www
+CDN Domains         : ✅ 2 domains
+
+⚙️  Generating .htaccess content...
+✅ .htaccess content generated successfully!
+💾 Writing to file: .htaccess
+✅ File written successfully!
+
+🎉 Generation completed successfully!
+─────────────────────────────────
+📄 Output file: .htaccess
+📊 File size: 4.2 KB
+📝 Lines: 156
+
+📖 Preview (first 15 lines):
+─────────────────────────
+ 1: # Generated by Enhanced .htaccess Generator
+ 2: # Generated on: 2025-07-11 15:30:45 UTC
+ 3: # Domain: mywebsite.com
+ 4:
+ 5: # Hide server information
+ 6: ServerSignature Off
+ 7: ServerTokens Prod
+ 8:
+ 9: # ================================
+10: # BASIC APACHE OPTIONS
+11: # ================================
+12: Options -Indexes -MultiViews
+13:
+14: # Force UTF-8 encoding
+15: AddDefaultCharset utf-8
+... (and 141 more lines)
+
+✨ .htaccess file is ready for deployment!
 ```
 
-## Integration with Version Control
+### CLI Command Options
 
-### Git Integration
-Add these to your `.gitignore`:
-```gitignore
-# Include config templates but not actual configs
-config.php
-*-config.php
-!example-config.php
-
-# Generated files
-.htaccess
-```
-
-### Environment-Specific Configs
 ```bash
-config/
-├── base-config.php         # Shared settings
-├── development-config.php  # Dev-specific settings
-├── staging-config.php      # Staging settings
-└── production-config.php   # Production settings
+# Help
+vendor/bin/generate-htaccess --help
+
+# Version
+vendor/bin/generate-htaccess --version
+
+# Debug mode
+vendor/bin/generate-htaccess config.php --debug
+
+# Different environments
+vendor/bin/generate-htaccess config/development.php dev/.htaccess
+vendor/bin/generate-htaccess config/production.php .htaccess
 ```
 
-### Build Scripts
-Create deployment scripts:
+## 🔧 Configuration Reference
+
+### Core Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `domain` | string | `''` | Main website domain |
+| `force_https` | boolean | `true` | Redirect HTTP to HTTPS |
+| `security_headers` | boolean | `true` | Add security headers |
+| `compression` | boolean | `true` | Enable Gzip compression |
+| `enable_caching` | boolean | `false` | Set browser cache headers |
+
+### Pretty URLs Options
+
+| Option | Type | Values | Description |
+|--------|------|--------|-------------|
+| `pretty_urls` | boolean | `false` | Enable URL rewriting |
+| `mode` | string | `'front-controller'`, `'extension-removal'`, `'both'` | Routing mode |
+| `handler_file` | string | `'index.php'` | Front controller file |
+| `url_parameter_name` | string | `'url'` | Query parameter name |
+| `force_trailing_slash` | boolean | `false` | Add/remove trailing slashes |
+
+### Security Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `content_security_policy` | boolean | `true` | Enable CSP headers |
+| `block_bad_bots` | boolean | `true` | Block malicious crawlers |
+| `protect_sensitive_files` | boolean | `true` | Protect config files |
+| `request_rate_limiting` | boolean | `true` | Limit requests per IP |
+| `max_requests_per_second` | integer | `10` | Rate limit threshold |
+
+### Performance Options
+
+| Option | Type | Values | Description |
+|--------|------|--------|-------------|
+| `cache_html_duration` | string | `'1 month'` | HTML cache duration |
+| `cache_images_duration` | string | `'1 year'` | Image cache duration |
+| `use_webp` | boolean | `true` | WebP image support |
+| `enable_gzip_compression` | boolean | `false` | Alternative Gzip setting |
+
+## 📂 Project Structure
+
+```
+yobuild/htaccess-generator/
+├── src/
+│   └── HtaccessGenerator.php    # Main generator class
+├── bin/
+│   └── generate-htaccess        # CLI executable
+├── examples/
+│   ├── config.php               # Full configuration example
+│   ├── simple-config.php        # Basic configuration
+│   ├── example-config.php       # Detailed example
+│   ├── pretty-urls-example.php  # Pretty URLs examples
+│   └── my-config.php            # Custom configuration
+├── index.html                   # Web interface
+├── ajax.php                     # Web interface backend
+├── composer.json                # Composer configuration
+├── .editorconfig               # Code style configuration
+├── .gitignore                  # Git ignore rules
+├── LICENSE                     # MIT license
+└── README.md                   # This file
+```
+
+## 🛠️ Integration Examples
+
+### Router Implementation (index.php)
+
+```php
+<?php
+// Get the requested URL from pretty URLs
+$requestPath = $_GET['url'] ?? '';
+$requestPath = trim($requestPath, '/');
+
+// Define routes
+$routes = [
+	'' => 'pages/home.php',
+	'about' => 'pages/about.php',
+	'contact' => 'pages/contact.php',
+	'blog' => 'pages/blog.php',
+	'blog/(.+)' => 'pages/blog-post.php'
+];
+
+// Route matching
+foreach ($routes as $pattern => $file) {
+	if ($pattern === $requestPath) {
+		include $file;
+		exit;
+	}
+
+	// Regex patterns
+	if (preg_match("#^{$pattern}$#", $requestPath, $matches)) {
+		$_ROUTE_PARAMS = array_slice($matches, 1);
+		include $file;
+		exit;
+	}
+}
+
+// 404 fallback
+http_response_code(404);
+include 'pages/404.php';
+```
+
+### Environment-Specific Deployment
+
 ```bash
 #!/bin/bash
 # deploy.sh
 ENVIRONMENT=${1:-production}
-php generate-htaccess.php "config/${ENVIRONMENT}-config.php" ".htaccess"
-echo "Generated .htaccess for $ENVIRONMENT environment"
+
+echo "Deploying for $ENVIRONMENT environment..."
+vendor/bin/generate-htaccess "config/${ENVIRONMENT}.php" ".htaccess"
+echo "✅ .htaccess generated for $ENVIRONMENT"
+
+# Upload to server
+if [ "$ENVIRONMENT" = "production" ]; then
+	rsync -av .htaccess user@server:/var/www/html/
+fi
 ```
 
-## Troubleshooting
+## 🔍 Validation and Error Handling
 
-### Common Issues
+The generator includes comprehensive validation:
 
-1. **Permission Errors**
-   ```bash
-   chmod +x generate-htaccess.php
-   chmod 755 src/
-   ```
+- **Domain Format**: Validates domain name syntax
+- **IP Addresses**: Validates IPv4/IPv6 and CIDR notation
+- **Country Codes**: Ensures 2-letter ISO country codes
+- **File Paths**: Validates error page and handler file paths
+- **Configuration Syntax**: Checks array structure and types
 
-2. **Class Not Found**
-   - Ensure `src/HtaccessGenerator.php` exists
-   - Check file permissions
-   - Verify namespace declarations
+Example validation output:
+```bash
+❌ Configuration validation failed:
+   • Invalid IP address in blacklist: 999.999.999.999
+   • Invalid country code: USA (must be 2-letter ISO code)
+   • pretty_urls_config.handler_file must be a valid PHP file path
+```
 
-3. **Invalid Configuration**
-   - Check array syntax in config file
-   - Validate boolean values (true/false)
-   - Ensure required quotes around strings
+## 🔧 Advanced Features
 
-### Debug Mode
-Add debug information to your config:
+### Custom MIME Types
 ```php
-// Enable error reporting
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+'custom_mime_types_enabled' => true,
+'custom_mime_types' => [
+	'.json application/json',
+	'.webp image/webp',
+	'.woff2 font/woff2'
+]
 ```
 
-## Best Practices
+### Hotlink Protection
+```php
+'hotlink_protection_enabled' => true,
+'hotlink_protection_list' => [
+	'trusted-partner.com',
+	'affiliate-site.com'
+]
+```
+
+### Custom Error Pages
+```php
+'error_pages' => [
+	'404' => '/errors/404.html',
+	'500' => '/errors/500.html',
+	'403' => '/errors/forbidden.html'
+]
+```
+
+### Custom .htaccess Rules
+```php
+'custom_rules' => [
+	'# Custom API rate limiting',
+	'<LocationMatch "^/api/">',
+	'    SetEnvIf Request_URI "^/api/" api_request',
+	'</LocationMatch>'
+]
+```
+
+## 🚀 Best Practices
 
 1. **Security First**: Always enable basic security features
-2. **Test Locally**: Test generated .htaccess files in development
-3. **Backup**: Keep backups of working .htaccess files
-4. **Documentation**: Comment your configuration choices
-5. **Version Control**: Track configuration changes
-6. **Environment Separation**: Use different configs for dev/staging/production
+2. **Test Locally**: Test generated `.htaccess` files in development
+3. **Backup**: Keep backups of working `.htaccess` files
+4. **Environment Separation**: Use different configs for dev/staging/production
+5. **Version Control**: Track configuration changes in git
+6. **Documentation**: Comment your configuration choices
 
-## Support
+## 🧪 Testing
 
-For questions about specific Apache directives, consult the [Apache HTTP Server Documentation](https://httpd.apache.org/docs/).
+Test your generated `.htaccess` file:
 
-For issues with this generator, check that your server supports the required Apache modules:
-- mod_rewrite
-- mod_headers
-- mod_deflate
-- mod_expires
-
-## Summary
-
-### 🚀 **Enhanced Features:**
-
-#### **1. Multiple Routing Modes**
-```php
-'mode' => 'front-controller'    // All → handler_file
-'mode' => 'extension-removal'   // Remove .php/.html extensions
-'mode' => 'both'               // Hybrid approach
-```
-
-#### **2. Smart Exclusions**
-```php
-'excluded_directories' => ['assets', 'css', 'js', 'images', 'admin']
-'excluded_extensions' => ['.css', '.js', '.png', '.jpg', '.pdf']
-```
-
-#### **3. Generated .htaccess Examples**
-
-**Simple Front Controller (Your Request):**
-```apache
-# Front Controller Pattern - Route all requests to index.php
-RewriteCond %{REQUEST_URI} !^/(assets|css|js|images|uploads)(/.*)?$ [NC]
-RewriteCond %{REQUEST_URI} !\.(css|js|png|jpg|jpeg|gif|ico|txt|xml|json)$ [NC]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
-
-# URL parameter: $_GET['url'] contains the requested path
-# Query strings: Original query parameters are preserved via QSA flag
-# Example: /blog/post-title?page=2 becomes index.php?url=blog/post-title&page=2
-```
-
-**With Custom Handler:**
-```apache
-RewriteRule ^(.*)$ router.php?route=$1 [QSA,L]
-```
-
-**Extension Removal Mode:**
-```apache
-# Route extensionless URLs to PHP files
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^([^.]+)$ $1.php [L]
-
-# Redirect .php extensions to clean URLs
-RewriteCond %{THE_REQUEST} \s/(.+)\.php[\s?] [NC]
-RewriteRule ^ /%1 [R=301,L]
-```
-
-### 📝 **Configuration Examples**
-
-#### **Basic Setup (Your Use Case):**
-```php
-'pretty_urls' => true,
-'pretty_urls_config' => [
-    'handler_file' => 'index.php',
-    'mode' => 'front-controller'
-]
-```
-
-#### **Framework Setup:**
-```php
-'pretty_urls_config' => [
-    'handler_file' => 'public/index.php',  // Symfony/Laravel style
-    'mode' => 'front-controller',
-    'url_parameter_name' => 'pathinfo'
-]
-```
-
-#### **API + Frontend:**
-```php
-'pretty_urls_config' => [
-    'handler_file' => 'app.php',
-    'excluded_directories' => ['api', 'admin'],  // Direct access
-    'url_parameter_name' => 'request_uri'
-]
-```
-
-### 🔧 **Usage Examples**
-
-#### **Generate with Pretty URLs:**
 ```bash
-# Use the simple config
-php generate-htaccess.php simple-config.php
+# Check Apache syntax
+apache2ctl configtest
 
-# Use framework config
-php generate-htaccess.php pretty-urls-example.php
+# Test specific URLs
+curl -I https://yourdomain.com/test-url
 
-# Output shows: Pretty URLs: ✅ Enabled (front-controller → index.php)
+# Check security headers
+curl -I https://yourdomain.com/
 ```
 
-#### **Sample Handler File (index.php):**
-```php
-<?php
-// Get the requested URL
-$url = $_GET['url'] ?? '';
-$url = trim($url, '/');
+## 📋 Requirements
 
-// Simple routing
-switch ($url) {
-    case '':
-        include 'pages/home.php';
-        break;
-    case 'about':
-        include 'pages/about.php';
-        break;
-    case 'contact':
-        include 'pages/contact.php';
-        break;
-    default:
-        // Handle dynamic routes
-        if (preg_match('#^blog/(.+)$#', $url, $matches)) {
-            $_GET['slug'] = $matches[1];
-            include 'pages/blog-post.php';
-        } else {
-            http_response_code(404);
-            include 'pages/404.php';
-        }
-}
-?>
-```
+- **PHP**: 8.2 or higher
+- **Apache Modules**: mod_rewrite, mod_headers, mod_deflate, mod_expires
+- **Composer**: For package installation (optional)
 
-### 🎛️ **Advanced Options**
+## 🤝 Contributing
 
-#### **Trailing Slash Control:**
-```php
-'force_trailing_slash' => true   // /about/
-'force_trailing_slash' => false  // /about
-```
+Contributions are welcome! Please:
 
-#### **Custom Parameter Names:**
-```php
-'url_parameter_name' => 'route'     // $_GET['route']
-'url_parameter_name' => 'path'      // $_GET['path']
-'url_parameter_name' => 'request'   // $_GET['request']
-```
+1. Fork the repository
+2. Create a feature branch
+3. Follow the coding standards (tabs, PHP 8.2+, OOP)
+4. Add tests for new features
+5. Submit a pull request
 
-#### **Query String Handling:**
-```php
-'query_string_passthrough' => true   // Preserve ?param=value
-'query_string_passthrough' => false  // Ignore query strings
-```
+## 📄 License
 
-### 📊 **Console Output Enhancement**
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-The command-line script now shows pretty URLs status:
-```
-📋 Configuration Summary:
-─────────────────────────
-Domain              : mywebsite.com
-Pretty URLs         : ✅ Enabled (front-controller → index.php)
-Force HTTPS         : ✅ Yes
-Security Headers    : ✅ Enabled
-```
+## 🆘 Support
 
-### 🔍 **Validation Features**
+- **Documentation**: Check this README and example configurations
+- **Issues**: [GitHub Issues](https://github.com/YoBuild/htaccess-generator/issues)
+- **Apache Docs**: [Apache HTTP Server Documentation](https://httpd.apache.org/docs/)
 
-The generator validates:
-- ✅ Handler file must be `.php`
-- ✅ Mode must be valid option
-- ✅ Parameter names must be valid
-- ✅ Directory exclusions are properly formatted
+## 🔗 Related Resources
 
-### 🎯 **Perfect for Modern Frameworks**
-
-This setup works excellently with:
-- **Custom PHP frameworks**
-- **Laravel** (public/index.php)
-- **Symfony** (public/index.php with pathinfo)
-- **WordPress-style** routing
-- **API applications**
-- **Microframeworks**
-
-The enhanced pretty URLs feature gives you enterprise-level URL routing capabilities while maintaining the simplicity you requested. You can start with the basic front-controller pattern and expand as needed!
+- [Apache mod_rewrite Documentation](https://httpd.apache.org/docs/current/mod/mod_rewrite.html)
+- [Content Security Policy Guide](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+- [HTTP Security Headers](https://owasp.org/www-project-secure-headers/)
 
 ---
 
-This project is an .htaccess generator that provides enhanced security and performance configurations for your web application. Below are the configuration options available and their default settings.
-
-## Configuration Options
-
-- **domain**: The main domain for the site. Default is an empty string.
-- **cdn_domains**: List of CDN domains allowed to serve assets. Default is an empty array.
-- **cors_domains**: List of domains allowed for CORS. Default is an empty array.
-- **follow_symlinks**: Allow following symbolic links. Default is `false`.
-- **directory_indexing**: Allow directory listing. Default is `false`.
-- **force_https**: Force HTTPS redirects. Default is `true`.
-- **pretty_urls**: Enable pretty URLs/URL rewriting. Default is `false`.
-- **compression**: Enable Gzip compression. Default is `true`.
-- **use_webp**: Enable WebP image support. Default is `true`.
-- **utf8_charset**: Force UTF-8 charset. Default is `true`.
-- **wildcard_subdomains**: Enable wildcard subdomain support. Default is `false`.
-- **enable_caching**: Enable caching headers. Default is `false`.
-- **enable_gzip_compression**: Enable Gzip compression. Default is `false`.
-- **access_control_enabled**: Enable access control. Default is `false`.
-- **custom_mime_types_enabled**: Enable custom MIME types. Default is `false`.
-- **redirect_management_enabled**: Enable redirect management. Default is `false`.
-- **hotlink_protection_enabled**: Enable hotlink protection. Default is `false`.
-- **security_enhancements**: Enable security enhancements. Default is `false`.
-- **additional_security_headers**: Enable additional security headers. Default is `false`.
-- **content_security_policy**: Enable Content Security Policy (CSP). Default is `true`.
-- **cors_headers**: Enable CORS headers. Default is `false`.
-- **block_bad_bots**: Block known bad bots. Default is `true`.
-- **protect_sensitive_files**: Protect sensitive files. Default is `true`.
-- **block_php_upload_exec**: Block PHP file uploads execution. Default is `true`.
-- **file_upload_protection**: Protect against malicious file uploads. Default is `true`.
-- **protect_wp_admin**: WordPress-specific protection. Default is `false`.
-- **protect_php_files**: Protect PHP files from direct access. Default is `true`.
-- **sanitize_server_tokens**: Hide server information. Default is `true`.
-- **xss_protection**: Enable XSS protection. Default is `true`.
-- **clickjacking_protection**: Enable clickjacking protection. Default is `true`.
-- **mime_sniffing_protection**: Protect against MIME sniffing. Default is `true`.
-- **request_rate_limiting**: Enable rate limiting. Default is `true`.
-- **security_headers**: Enable security headers. Default is `true`.
-- **custom_document_root**: Custom document root path. Default is an empty string.
-- **image_placeholder**: Path to default image placeholder. Default is an empty string.
-- **custom_rules**: Array of custom htaccess rules. Default is an empty array.
-- **ip_blacklist**: List of IPs to block. Default is an empty array.
-- **ip_whitelist**: List of IPs to allow. Default is an empty array.
-- **country_blacklist**: List of country codes to block. Default is an empty array.
-- **max_requests_per_second**: Maximum requests per second per IP. Default is `10`.
-- **error_pages**: Custom error pages for HTTP status codes 400, 401, 403, 404, and 500. Default is `null` for each.
-
-## Usage
-
-To use this generator, configure the options in the `ajax.php` file and submit the form. The generated `.htaccess` content will be returned in the response.
+Made with ❤️ by [Yohn](https://github.com/Yohn) | [YoBuild](https://github.com/YoBuild)
