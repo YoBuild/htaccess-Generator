@@ -57,5 +57,20 @@ return [
 		// Disable features we don't need
 		'protect_wp_admin' => false,  // Only enable if using WordPress
 		'wildcard_subdomains' => true,
+
+		'pretty_urls' => true,
+		'pretty_urls_config' => [
+			'handler_file' => 'app.php',
+			'mode' => 'front-controller',
+			//'excluded_directories' => [
+			//	'api',        // API endpoints served directly
+			//	'admin',      // Admin panel served directly
+			//	'assets',
+			//	'public'
+			//],
+			'force_trailing_slash' => true,
+			'query_string_passthrough' => true,
+			'url_parameter_name' => 'request_uri'
+		],
 	]
 ];

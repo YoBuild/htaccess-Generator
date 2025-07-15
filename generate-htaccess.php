@@ -14,7 +14,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../src/HtaccessGenerator.php';
+require_once __DIR__ . '/src/HtaccessGenerator.php';
 
 use YoBuild\Generators\HtaccessGenerator;
 
